@@ -205,8 +205,8 @@ async function loadAll() {
   L.style.display='flex'; ['summary','brand','roadmap'].forEach(v=>document.getElementById('view-'+v).hidden=true);
   try {
     M.textContent='Loading templates…';
-    const idx = await (await fetch('templates/index.json')).json();
-    for (const t of idx) TEMPLATES[t.id] = await (await fetch(`templates/${t.id}.json`)).json();
+    const idx = await (await fetch('templates/index.json',{cache:'no-cache'})).json();
+    for (const t of idx) TEMPLATES[t.id] = await (await fetch(`templates/${t.id}.json`,{cache:'no-cache'})).json();
 
     M.textContent='Loading Onboarding 2026 from Asana…';
     const OPT='name,notes,parent.name,completed,completed_at,created_at,assignee.name,permalink_url,custom_fields.gid,custom_fields.name,custom_fields.display_value,custom_fields.text_value';
@@ -243,7 +243,9 @@ function buildBrand(t) {
   const anchor = ov.anchor ? d0(ov.anchor) : ds ? d0(ds) : d0(t.created_at);
   const {tpl,assumed}=pickTemplate(brandType);
   const steps = tpl.steps.map(s=>{ const o=ov.steps[s.id]||{}; return {...s, start:o.start?d0(o.start):addDays(anchor,s.startOffset), due:o.due?d0(o.due):addDays(anchor,s.dueOffset), status:o.status||s.status, notes:o.notes||s.notes, overridden:!!(o.start||o.due||o.status||o.notes)}; });
-  const goLive = new Date(Math.max(addDays(anchor, tpl.plannedDurationDays-1), ...steps.map(s=>s.due)));
+  const goLiveStep = steps.find(s=>s.id===tpl.goLiveStepId);
+  const goLive = goLiveStep ? goLiveStep.due : addDays(anchor, tpl.goLiveOffset);
+  const planEnd = new Date(Math.max(addDays(anchor, tpl.plannedDurationDays-1), ...steps.map(s=>s.due)));
   const workingStatus = cf(t,CF.workingStatus)||null, onboardStatus = cf(t,CF.onboardStatus)||null;
   const live = t.completed && t._sec.live, blocked=t._sec.blocked, churned=t._sec.churned;
   const tdy=today(); const inStage = Math.max(0, diffDays(t._moves[t._moves.length-1].date, tdy));
@@ -252,7 +254,7 @@ function buildBrand(t) {
   const blockerNote = ov.blocker || (blocked && t._lastComment ? t._lastComment.text : null);
   return { gid:t.gid, raw:t, name, brandType, salesRep:cf(t,CF.salesRep)||'—', ops:t.assignee?.name||'—', blockerOwner, blockerNote, workingStatus, onboardStatus, lastComment:t._lastComment, ov, anchorSrc,
            signed:ds?d0(ds):null, anchor, stage:t._sec.name, step:t._sec.step, live, blocked, churned, inStage, moves:t._moves, permalink:t.permalink_url,
-           tpl, assumed, steps, goLive, health, via:parentCompany(t).via, daysElapsed:diffDays(anchor,tdy) };
+           tpl, assumed, steps, goLive, goLiveStep, planEnd, health, via:parentCompany(t).via, daysElapsed:diffDays(anchor,tdy) };
 }
 
 /* ───────────── Views ───────────── */
@@ -272,12 +274,12 @@ function renderSummary() {
       <div class="card"><div class="lbl">Behind plan</div><div class="val" style="color:${behind?'var(--bad)':'var(--ok)'}">${behind}</div><div class="sub">past planned go-live</div></div>
     </div>
     <div class="panel"><h2>Brand status <span style="text-transform:none;letter-spacing:0;color:#94a3b8">(click a row for the timeline)</span></h2>
-    <div style="overflow-x:auto"><table><thead><tr><th>Brand</th><th>Type</th><th>Current stage</th><th>Days in stage</th><th>Health</th><th>Signed</th><th>Planned go-live</th><th>Day</th><th>Ops</th><th>Sales rep</th><th>Blocker</th></tr></thead><tbody>
+    <div style="overflow-x:auto"><table><thead><tr><th>Brand</th><th>Type</th><th>Current stage</th><th>Days in stage</th><th>Health</th><th>Signed</th><th>Planned go-live</th><th>Plan complete</th><th>Day</th><th>Ops</th><th>Sales rep</th><th>Blocker</th></tr></thead><tbody>
     ${brands.map(b=>`<tr class="click" onclick="selected='${b.gid}';showView('brand')">
       <td><b>${esc(b.name)}</b></td><td>${esc(b.brandType||'—')}${b.assumed?' <span class="pill warn" title="No Brand Type in Asana; 3P New Shop template assumed">?</span>':''}</td>
       <td>${b.live?'✅ ':b.blocked?'🔴 ':''}${esc(b.stage)}</td><td>${b.inStage}d</td>
-      <td><span class="pill ${b.health.k}">${b.health.l}</span></td><td>${fmt(b.signed)}</td><td>${fmt(b.goLive)}</td>
-      <td>${b.daysElapsed} / ${b.tpl.plannedDurationDays}</td><td>${esc(b.ops)}</td><td>${esc(b.salesRep)}</td><td style="max-width:320px;white-space:normal">${b.blockerOwner?`<span class="pill bad">${esc(b.blockerOwner)}</span> `:''}${b.blockerNote?`<span style="font-size:12px;color:#475569">${esc(b.blockerNote.slice(0,140))}${b.blockerNote.length>140?'…':''}</span>`:(b.blocked?'<span class="pill warn">no reason in Asana</span>':'—')}</td></tr>`).join('')}
+      <td><span class="pill ${b.health.k}">${b.health.l}</span></td><td>${fmt(b.signed)}</td><td title="${esc(b.goLiveStep?b.goLiveStep.task:'')}">${fmt(b.goLive)}</td><td style="color:#64748b">${fmt(b.planEnd)}</td>
+      <td>${b.daysElapsed} / ${diffDays(b.anchor,b.goLive)+1}</td><td>${esc(b.ops)}</td><td>${esc(b.salesRep)}</td><td style="max-width:320px;white-space:normal">${b.blockerOwner?`<span class="pill bad">${esc(b.blockerOwner)}</span> `:''}${b.blockerNote?`<span style="font-size:12px;color:#475569">${esc(b.blockerNote.slice(0,140))}${b.blockerNote.length>140?'…':''}</span>`:(b.blocked?'<span class="pill warn">no reason in Asana</span>':'—')}</td></tr>`).join('')}
     </tbody></table></div></div>`;
 }
 
@@ -285,7 +287,7 @@ function renderBrand() {
   const el=document.getElementById('view-brand'); const b=brands.find(x=>x.gid===selected)||brands[0];
   if (!b) { el.innerHTML='<div class="empty">No P&amp;G brands found.</div>'; return; }
   const tdy=today(); const first=b.tpl.categories[0];
-  const from=addDays(new Date(Math.min(b.anchor, tdy)),-2), to=addDays(new Date(Math.max(b.goLive, tdy)), 5), days=diffDays(from,to)+1, DW=22, LEFT=470;
+  const from=addDays(new Date(Math.min(b.anchor, tdy)),-2), to=addDays(new Date(Math.max(b.planEnd, tdy)), 5), days=diffDays(from,to)+1, DW=22, LEFT=470;
   const col = d => Math.max(0, diffDays(from,d));
   // header: month cells span their days; day cells below
   let months='', dayCells=''; { let i=0; while (i<days) { const d=addDays(from,i); let n=1; while (i+n<days && addDays(from,i+n).getMonth()===d.getMonth()) n++; months+=`<div class="g-head month" style="grid-column:span ${n}">${d.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>`; i+=n; } }
@@ -304,7 +306,7 @@ function renderBrand() {
       const ownerCls = s.owner==='Pattern'?'Pattern':s.owner==='Brand'?'Brand':'Both';
       const st = s.status==='Done'?'st-done':s.status==='Blocked'?'st-blocked':s.status==='In Progress'?'st-progress':s.status==='N/A'?'st-na':'';
       const late = !st && !b.live && s.due<tdy, future = !st && s.start>tdy;
-      rows += `<div class="g-cell g-left step ${editMode?'editable':''}" title="${esc(s.task)}${s.notes?'\n'+esc(s.notes):''}" ${editMode?`onclick="openStepEdit('${s.id}')"`:''}><span style="color:#94a3b8;font-size:11px">${s.action}</span><span class="owner ${ownerCls}">${esc(s.owner)}</span><span class="task">${esc(s.task)}</span><span class="dates">${fmt(s.start)} → ${fmt(s.due)}${s.overridden?' ✎':''}${s.notes?' 💬':''}</span></div>
+      rows += `<div class="g-cell g-left step ${editMode?'editable':''}" title="${esc(s.task)}${s.notes?'\n'+esc(s.notes):''}" ${editMode?`onclick="openStepEdit('${s.id}')"`:''}><span style="color:#94a3b8;font-size:11px">${s.action}</span><span class="owner ${ownerCls}">${esc(s.owner)}</span><span class="task">${esc(s.task)}${s.id===b.tpl.goLiveStepId?' <span class="pill ok" style="font-size:10px">GO-LIVE</span>':''}</span><span class="dates">${fmt(s.start)} → ${fmt(s.due)}${s.overridden?' ✎':''}${s.notes?' 💬':''}</span></div>
                <div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px">${bar(s.start,s.due,`${ownerCls} ${st} ${future?'future':''} ${late?'late':''}`, `${diffDays(s.start,s.due)+1}d${s.status&&s.status!=='Not Started'?' · '+s.status:''}`, `${s.task}\n${fmt(s.start)} → ${fmt(s.due)} · ${s.owner} · ${s.status||'Not Started'}${late?'\nPast planned due date, not confirmed':''}${s.notes?'\n'+s.notes:''}`)}${todayLine}</div>`;
     }
   }
@@ -317,7 +319,8 @@ function renderBrand() {
       <div class="kv">Current stage<b>${b.live?'✅ ':b.blocked?'🔴 ':''}${esc(b.stage)} <span style="color:#64748b;font-weight:400">· ${b.inStage}d</span></b></div>
       <div class="kv">Health<b><span class="pill ${b.health.k}">${b.health.l}</span></b></div>
       <div class="kv">Plan start<b>${fmtY(b.anchor)} <span style="color:#64748b;font-weight:400">· ${esc(b.anchorSrc)}</span></b></div>
-      <div class="kv">Planned go-live<b>${fmtY(b.goLive)} <span style="color:#64748b;font-weight:400">· day ${b.daysElapsed} of ${diffDays(b.anchor,b.goLive)+1}</span></b></div>
+      <div class="kv">Planned go-live<b title="${esc(b.goLiveStep?b.goLiveStep.task:'')}">${fmtY(b.goLive)} <span style="color:#64748b;font-weight:400">· day ${b.daysElapsed} of ${diffDays(b.anchor,b.goLive)+1}</span></b></div>
+      <div class="kv">Plan complete<b>${fmtY(b.planEnd)} <span style="color:#64748b;font-weight:400">· all workstreams</span></b></div>
       <div class="kv">Ops / Sales<b>${esc(b.ops)} / ${esc(b.salesRep)}</b></div>
       <div style="margin-left:auto;display:flex;gap:8px;align-self:center">
         ${b.tpl.externalDoc?`<a class="btn light" target="_blank" href="${b.tpl.externalDoc}">📄 External doc</a>`:''}
@@ -367,13 +370,14 @@ async function persist(b){
 function renderRoadmap() {
   const el=document.getElementById('view-roadmap');
   if (!brands.length) { el.innerHTML='<div class="empty">No P&amp;G brands found.</div>'; return; }
-  const tdy=today(); const from=addDays(new Date(Math.min(...brands.map(b=>b.anchor))),-3), to=addDays(new Date(Math.max(tdy,...brands.map(b=>b.goLive))),7);
+  const tdy=today(); const from=addDays(new Date(Math.min(...brands.map(b=>b.anchor))),-3), to=addDays(new Date(Math.max(tdy,...brands.map(b=>b.planEnd))),7);
   const days=diffDays(from,to)+1, DW=Math.max(6, Math.min(22, Math.floor(1200/days)));
   const col=d=>Math.max(0,diffDays(from,d));
   let weeks=''; for (let i=0;i<days;i++){ const d=addDays(from,i); weeks+=`<div class="g-head" style="font-size:9.5px">${d.getDay()===1?fmt(d):''}</div>`; }
   const rows = brands.map(b=>{
     const end = b.live ? b.moves[b.moves.length-1].date : tdy;
-    const plan=`<div class="g-bar ${b.live?'':'future'}" style="left:${col(b.anchor)*DW}px;width:${(diffDays(b.anchor,b.goLive)+1)*DW-2}px;background:#c7d2fe;color:#1e293b" title="Planned: ${fmt(b.anchor)} → ${fmt(b.goLive)}">plan · go-live ${fmt(b.goLive)}</div>`;
+    const tail=`<div class="g-bar" style="left:${col(b.goLive)*DW}px;width:${Math.max(1,diffDays(b.goLive,b.planEnd)+1)*DW-2}px;background:#e2e8f0;color:#64748b" title="Remaining workstreams to ${fmt(b.planEnd)}"></div>`;
+    const plan=tail+`<div class="g-bar ${b.live?'':'future'}" style="left:${col(b.anchor)*DW}px;width:${(diffDays(b.anchor,b.goLive)+1)*DW-2}px;background:#c7d2fe;color:#1e293b" title="Planned: ${fmt(b.anchor)} → go-live ${fmt(b.goLive)}">plan · go-live ${fmt(b.goLive)}</div>`;
     const act=`<div class="g-bar actual ${b.live?'live':b.blocked?'blocked':''}" style="left:${col(b.anchor)*DW}px;width:${Math.max(1,diffDays(b.anchor,end)+1)*DW-2}px;top:5px;height:9px;line-height:9px;font-size:0" title="Actual: ${fmt(b.anchor)} → ${fmt(end)} · ${b.stage}"></div>`;
     return `<div class="g-cell g-left" style="cursor:pointer" onclick="selected='${b.gid}';showView('brand')"><b>${esc(b.name)}</b> <span style="color:#64748b">· ${esc(b.stage)}</span> <span class="pill ${b.health.k}" style="margin-left:6px">${b.health.l}</span></div>
             <div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px;height:30px">${plan}${act}<div class="g-today ${b===brands[0]?'lbl':''}" style="left:${(col(tdy)+.5)*DW}px"></div></div>`;
@@ -381,7 +385,7 @@ function renderRoadmap() {
   el.innerHTML = `<div class="panel"><h2>All P&amp;G brands · planned vs actual</h2>
     <div class="gantt"><div class="g-grid" style="grid-template-columns:340px repeat(${days},${DW}px)">
       <div class="g-head g-left" style="text-align:left;padding-left:10px">Brand · stage</div>${weeks}${rows}</div></div>
-    <div class="legend"><span><i style="background:#c7d2fe"></i>Planned window (template)</span><span><i style="background:#0f172a"></i>Actual elapsed (Asana)</span><span><i style="background:var(--ok)"></i>Live</span><span><i style="background:var(--bad)"></i>Blocked</span></div></div>`;
+    <div class="legend"><span><i style="background:#c7d2fe"></i>Planned to go-live (template)</span><span><i style="background:#e2e8f0"></i>Remaining workstreams to plan complete</span><span><i style="background:#0f172a"></i>Actual elapsed (Asana)</span><span><i style="background:var(--ok)"></i>Live</span><span><i style="background:var(--bad)"></i>Blocked</span></div></div>`;
 }
 
 /* ───────────── Boot ───────────── */

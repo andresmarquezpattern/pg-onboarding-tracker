@@ -101,7 +101,14 @@ def convert(stem, meta):
             categories.append(s["category"])
 
     total_days = max(s["dueOffset"] for s in steps if s["dueOffset"] is not None) + 1
+    # The real go-live is the "Live/Active" (or "go-live") step inside the FIRST category;
+    # every other category keeps running after it (inventory, affiliate, ...).
+    first_cat = categories[0]
+    go_live = next((s for s in steps if s["category"] == first_cat and re.search(r"live\s*/\s*active|go-live|marked live", s["task"], re.I)), None)
+    assert go_live, f"{stem}: no go-live step found in category {first_cat}"
     return {
+        "goLiveStepId": go_live["id"],
+        "goLiveOffset": go_live["dueOffset"],
         "id": stem,
         "label": meta["label"],
         "title": title,
@@ -122,7 +129,7 @@ def main():
     for stem, meta in TEMPLATES.items():
         data = convert(stem, meta)
         (OUT / f"{stem}.json").write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
-        index.append({k: data[k] for k in ("id", "label", "asanaBrandTypes", "plannedDurationDays", "stepCount", "categories")})
+        index.append({k: data[k] for k in ("id", "label", "asanaBrandTypes", "plannedDurationDays", "goLiveStepId", "goLiveOffset", "stepCount", "categories")})
         print(f"{stem:28s} {data['stepCount']:3d} steps  {data['plannedDurationDays']:3d} days  {len(data['categories'])} categories")
     (OUT / "index.json").write_text(json.dumps(index, indent=2, ensure_ascii=False) + "\n")
 

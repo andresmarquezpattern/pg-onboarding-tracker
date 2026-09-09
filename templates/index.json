@@ -6,6 +6,8 @@
       "3p"
     ],
     "plannedDurationDays": 63,
+    "goLiveStepId": "shop-creation-16",
+    "goLiveOffset": 31,
     "stepCount": 61,
     "categories": [
       "Shop Creation",
@@ -25,6 +27,8 @@
       "3p - existing"
     ],
     "plannedDurationDays": 73,
+    "goLiveStepId": "ein-transfer-19",
+    "goLiveOffset": 40,
     "stepCount": 76,
     "categories": [
       "EIN Transfer",
@@ -43,6 +47,8 @@
       "new shop"
     ],
     "plannedDurationDays": 72,
+    "goLiveStepId": "shop-build-18",
+    "goLiveOffset": 26,
     "stepCount": 72,
     "categories": [
       "Shop Build",
@@ -62,6 +68,8 @@
       "hybrid"
     ],
     "plannedDurationDays": 72,
+    "goLiveStepId": "subaccount-access-14",
+    "goLiveOffset": 12,
     "stepCount": 68,
     "categories": [
       "Subaccount Access",
