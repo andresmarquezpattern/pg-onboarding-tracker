@@ -61,6 +61,8 @@
   .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-2px; margin-right:4px; }
   .g-cell.step { display:flex; align-items:center; gap:6px; } .g-cell.step .task { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .g-cell .dates { color:#94a3b8; font-size:11px; flex:none; }
+  .g-grid.wrap .g-cell.step { align-items:flex-start; white-space:normal; } .g-grid.wrap .g-cell.step .task { white-space:normal; overflow:visible; text-overflow:clip; line-height:1.35; }
+  .g-grid.wrap .g-cell.step .owner, .g-grid.wrap .g-cell.step .dates { margin-top:1px; }
   .g-cell.editable { cursor:pointer; } .g-cell.editable:hover { background:#eef2ff; }
   .g-bar.st-done { background:var(--ok) !important; opacity:1; } .g-bar.st-blocked { background:var(--bad) !important; opacity:1; } .g-bar.st-progress { outline:2px solid #1d4ed8; outline-offset:-2px; }
   .g-bar.st-na { background:#cbd5e1 !important; color:#475569; }
@@ -196,7 +198,8 @@ const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
 const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
 /* ───────────── State ───────────── */
-let TEMPLATES = {}; let brands = []; let selected = null; let view='summary'; let editMode=false; let OVERRIDES_OK=false; let editing=null;
+let TEMPLATES = {}; let brands = []; let selected = null; let view='summary'; let editMode=false; let wrapTasks=(()=>{ try { return localStorage.getItem('pg_wrap')!=='0'; } catch(e){ return true; } })();
+function toggleWrap(){ wrapTasks=!wrapTasks; try{ localStorage.setItem('pg_wrap', wrapTasks?'1':'0'); }catch(e){} render(); } let OVERRIDES_OK=false; let editing=null;
 
 /* ───────────── Load ───────────── */
 async function loadAll() {
@@ -333,10 +336,11 @@ function renderBrand() {
     </div>
     <div class="panel">
       <div class="toolbar"><h2 style="margin:0;flex:1">Timeline · ${esc(b.tpl.title)}</h2>
+        <button class="btn light" onclick="toggleWrap()" title="Show full task names or one line per step">${wrapTasks?'▤ Compact rows':'▥ Expand task names'}</button>
         ${PROXY?`<button class="btn light ${editMode?'on':''}" onclick="toggleEdit()">${editMode?'✓ Editing — click a step':'✎ Edit timeline'}</button><button class="btn light" onclick="openBrandEdit()">⚙ Plan settings</button>`:'<span style="color:#94a3b8;font-size:12px">Editing available on the Cloudflare site</span>'}
       </div>
       ${PROXY&&!OVERRIDES_OK?'<div class="note-box" style="margin:0 0 10px"><b>Editing is not enabled yet.</b> Bind a KV namespace named <code>OVERRIDES</code> to this Pages project (Settings → Bindings) and redeploy.</div>':''}
-      <div class="gantt"><div class="g-grid" style="${gridCols}">
+      <div class="gantt"><div class="g-grid ${wrapTasks?'wrap':''}" style="${gridCols}">
         <div class="g-head g-left" style="grid-row:1 / span 2;background:#f8fafc;text-align:left;padding-left:10px;line-height:44px">Step · owner · planned dates</div>${months}${dayCells}${rows}
       </div></div>
       <div class="legend"><span><i style="background:var(--pattern)"></i>Pattern</span><span><i style="background:var(--brand)"></i>Brand</span><span><i style="background:var(--both)"></i>Pattern/Brand</span><span><i style="background:#0f172a"></i>Actual Asana stage</span><span><i style="background:var(--ok)"></i>Done</span><span><i style="background:var(--bad)"></i>Blocked</span><span><i style="border:2px solid #1d4ed8;background:#fff"></i>In progress</span><span><i style="border:2px solid var(--bad);background:#fff"></i>Past due, not confirmed</span><span><i style="background:var(--pattern);opacity:.45"></i>Future</span><span>✎ edited</span></div>
