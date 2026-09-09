@@ -209,8 +209,10 @@ async function loadAll() {
   L.style.display='flex'; ['summary','brand','roadmap'].forEach(v=>document.getElementById('view-'+v).hidden=true);
   try {
     M.textContent='Loading templates…';
-    const idx = await (await fetch('templates/index.json',{cache:'no-cache'})).json();
-    for (const t of idx) TEMPLATES[t.id] = await (await fetch(`templates/${t.id}.json`,{cache:'no-cache'})).json();
+    const bust = '?v=' + Date.now(); // templates are tiny; always fetch the latest, bypassing any browser/edge cache
+    const idx = await (await fetch('templates/index.json' + bust, {cache:'no-store'})).json();
+    TEMPLATES = {};
+    for (const t of idx) TEMPLATES[t.id] = await (await fetch(`templates/${t.id}.json` + bust, {cache:'no-store'})).json();
 
     M.textContent='Loading Onboarding 2026 from Asana…';
     const OPT='name,notes,parent.name,completed,completed_at,created_at,assignee.name,permalink_url,custom_fields.gid,custom_fields.name,custom_fields.display_value,custom_fields.text_value';
