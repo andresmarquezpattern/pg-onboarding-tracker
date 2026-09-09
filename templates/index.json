@@ -1,0 +1,76 @@
+[
+  {
+    "id": "3p-new-shop",
+    "label": "3P – New Shop Create",
+    "asanaBrandTypes": [
+      "3p"
+    ],
+    "plannedDurationDays": 63,
+    "stepCount": 61,
+    "categories": [
+      "Shop Creation",
+      "Operations",
+      "Inventory",
+      "Merchandising",
+      "Affiliate",
+      "Advertising",
+      "Brand Handles"
+    ]
+  },
+  {
+    "id": "3p-existing-ein-transfer",
+    "label": "3P – Existing Shop (EIN Transfer)",
+    "asanaBrandTypes": [
+      "ein transfer",
+      "3p - existing"
+    ],
+    "plannedDurationDays": 73,
+    "stepCount": 76,
+    "categories": [
+      "EIN Transfer",
+      "Operations",
+      "Merchandising",
+      "Affiliate",
+      "Inventory",
+      "Advertising",
+      "Brand Handles"
+    ]
+  },
+  {
+    "id": "1p-new-shop",
+    "label": "1P – New Shop Create",
+    "asanaBrandTypes": [
+      "new shop"
+    ],
+    "plannedDurationDays": 72,
+    "stepCount": 72,
+    "categories": [
+      "Shop Build",
+      "Operations",
+      "Merchandising",
+      "Affiliate",
+      "Inventory",
+      "Advertising",
+      "Brand Handles"
+    ]
+  },
+  {
+    "id": "1p-existing-subaccount",
+    "label": "1P – Existing Shop (Subaccount Access)",
+    "asanaBrandTypes": [
+      "existing shop",
+      "hybrid"
+    ],
+    "plannedDurationDays": 72,
+    "stepCount": 68,
+    "categories": [
+      "Subaccount Access",
+      "Operations",
+      "Merchandising",
+      "Affiliate",
+      "Inventory",
+      "Advertising",
+      "Brand Handles"
+    ]
+  }
+]
