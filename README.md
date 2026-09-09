@@ -27,6 +27,12 @@ python3 scripts/convert_templates.py
 Dates in the JSON are stored as **day offsets from the template's first Start date**, so a brand
 signed on any date gets a full planned timeline automatically.
 
+The `DROP` table in the script removes steps that contradict the Internal Onboarding SOP
+(07/31/2026): the Inventory category and Shelf-catalog steps for both 1P flows, the CQ/BA
+re-approval steps for 1P Existing (qualifications are inherited), and Operations steps that
+duplicate the first-category BA/CQ steps. The source Excel files are left exactly as shared;
+each template JSON lists what was removed under `removedPerSOP`.
+
 ## Asana token
 
 The dashboard never ships with a token. Each viewer pastes their own Asana Personal Access Token

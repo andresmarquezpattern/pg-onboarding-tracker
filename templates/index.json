@@ -29,7 +29,7 @@
     "plannedDurationDays": 73,
     "goLiveStepId": "ein-transfer-19",
     "goLiveOffset": 40,
-    "stepCount": 76,
+    "stepCount": 73,
     "categories": [
       "EIN Transfer",
       "Operations",
@@ -46,16 +46,15 @@
     "asanaBrandTypes": [
       "new shop"
     ],
-    "plannedDurationDays": 72,
+    "plannedDurationDays": 29,
     "goLiveStepId": "shop-build-18",
     "goLiveOffset": 26,
-    "stepCount": 72,
+    "stepCount": 56,
     "categories": [
       "Shop Build",
       "Operations",
       "Merchandising",
       "Affiliate",
-      "Inventory",
       "Advertising",
       "Brand Handles"
     ]
@@ -67,16 +66,15 @@
       "existing shop",
       "hybrid"
     ],
-    "plannedDurationDays": 72,
+    "plannedDurationDays": 25,
     "goLiveStepId": "subaccount-access-14",
     "goLiveOffset": 12,
-    "stepCount": 68,
+    "stepCount": 51,
     "categories": [
       "Subaccount Access",
       "Operations",
       "Merchandising",
       "Affiliate",
-      "Inventory",
       "Advertising",
       "Brand Handles"
     ]

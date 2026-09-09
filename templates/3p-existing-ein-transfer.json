@@ -21,7 +21,24 @@
     "Advertising",
     "Brand Handles"
   ],
-  "stepCount": 76,
+  "stepCount": 73,
+  "removedPerSOP": [
+    {
+      "id": "operations-6",
+      "category": "Operations",
+      "task": "Gather re-approval documents"
+    },
+    {
+      "id": "operations-7",
+      "category": "Operations",
+      "task": "Re-approval documents submitted"
+    },
+    {
+      "id": "operations-8",
+      "category": "Operations",
+      "task": "Brand Authorization & Category Qualification re-approved"
+    }
+  ],
   "steps": [
     {
       "category": "EIN Transfer",
@@ -334,42 +351,6 @@
       "id": "operations-5",
       "startOffset": 10,
       "dueOffset": 13
-    },
-    {
-      "category": "Operations",
-      "action": 6.0,
-      "task": "Gather re-approval documents",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-6",
-      "startOffset": 13,
-      "dueOffset": 13
-    },
-    {
-      "category": "Operations",
-      "action": 7.0,
-      "task": "Re-approval documents submitted",
-      "owner": "Pattern",
-      "days": 2,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-7",
-      "startOffset": 13,
-      "dueOffset": 14
-    },
-    {
-      "category": "Operations",
-      "action": 8.0,
-      "task": "Brand Authorization & Category Qualification re-approved",
-      "owner": "Pattern",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-8",
-      "startOffset": 14,
-      "dueOffset": 17
     },
     {
       "category": "Operations",

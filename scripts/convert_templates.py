@@ -30,7 +30,7 @@ TEMPLATES = {
     "3p-new-shop": {
         "label": "3P – New Shop Create",
         "asanaBrandTypes": ["3p"],           # plain "3P"
-        "externalDoc": None,
+        "externalDoc": "https://docs.google.com/spreadsheets/d/1PIOtAY0U9dq3F3emFTSd7BqDuQgi8P1XUzRQZMSmgQo/edit?usp=sharing",
     },
     "3p-existing-ein-transfer": {
         "label": "3P – Existing Shop (EIN Transfer)",
@@ -50,6 +50,31 @@ TEMPLATES = {
 }
 
 HEADER = ["Category", "Action #", "Task", "Owner", "Start", "Due", "Days", "Status", "Notes"]
+
+# Steps/categories removed per the Internal Onboarding SOP (07/31/2026). The source Excel
+# files are kept as Catherine shared them; these rules are applied at conversion time.
+#   1P flows: Pattern does not buy/hold inventory (the "waiting" stage is a test order via the
+#   brand's own fulfillment platform) and does not build the catalog in Shelf. 1P Existing
+#   inherits CQ/BA, so the Operations "re-approval" steps contradict the SOP. The Operations
+#   BA/CQ steps also duplicate the first-category steps in every template.
+DROP = {
+    "1p-new-shop": {
+        "categories": ["Inventory"],
+        "steps": ["operations-2", "operations-3", "operations-4", "operations-5",      # Shelf catalog / Connect (3P)
+                  "operations-6", "operations-7", "operations-8",                      # BA/CQ duplicates of Shop Build 12-13
+                  "operations-10"],                                                    # Map SKUs to Shelf (3P)
+    },
+    "1p-existing-subaccount": {
+        "categories": ["Inventory"],
+        "steps": ["operations-2", "operations-3", "operations-4", "operations-5",      # Shelf catalog / Connect (seller record already in Subaccount Access 10)
+                  "operations-6", "operations-7", "operations-8",                      # re-approval: CQ/BA are inherited per SOP
+                  "operations-9", "operations-10"],                                    # products already live; Shelf SKU mapping (3P)
+    },
+    "3p-existing-ein-transfer": {
+        "categories": [],
+        "steps": ["operations-6", "operations-7", "operations-8"],                     # duplicates of EIN Transfer 13-14
+    },
+}
 
 
 def slug(s):
@@ -91,9 +116,15 @@ def convert(stem, meta):
         })
 
     anchor = min(s["_start"] for s in steps if s["_start"])
-    categories = []
     for s in steps:
         s["id"] = f"{slug(s['category'])}-{s['action']:g}" if s["action"] is not None else slug(s["task"])[:40]
+    drop = DROP.get(stem, {"categories": [], "steps": []})
+    removed = [s for s in steps if s["category"] in drop["categories"] or s["id"] in drop["steps"]]
+    missing = set(drop["steps"]) - {s["id"] for s in steps}
+    assert not missing, f"{stem}: DROP references unknown steps {missing}"
+    steps = [s for s in steps if s not in removed]
+    categories = []
+    for s in steps:
         s["startOffset"] = (s["_start"] - anchor).days if s["_start"] else None
         s["dueOffset"] = (s["_due"] - anchor).days if s["_due"] else None
         del s["_start"], s["_due"]
@@ -119,6 +150,7 @@ def convert(stem, meta):
         "plannedDurationDays": total_days,
         "categories": categories,
         "stepCount": len(steps),
+        "removedPerSOP": [{"id": r["id"], "category": r["category"], "task": r["task"]} for r in removed],
         "steps": steps,
     }
 

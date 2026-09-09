@@ -11,17 +11,103 @@
   "externalDoc": "https://docs.google.com/spreadsheets/d/1S5im6ljrQ5QXRgGdfeWESrOx0k2phriREoRRIvnzTWA/edit?usp=sharing",
   "sourceFile": "source-templates/1p-existing-subaccount.xlsx",
   "sourceAnchorDate": "2026-08-04",
-  "plannedDurationDays": 72,
+  "plannedDurationDays": 25,
   "categories": [
     "Subaccount Access",
     "Operations",
     "Merchandising",
     "Affiliate",
-    "Inventory",
     "Advertising",
     "Brand Handles"
   ],
-  "stepCount": 68,
+  "stepCount": 51,
+  "removedPerSOP": [
+    {
+      "id": "operations-2",
+      "category": "Operations",
+      "task": "Create Brand in Shelf and list all products"
+    },
+    {
+      "id": "operations-3",
+      "category": "Operations",
+      "task": "Set up Connect integration for Brand shop with placeholder"
+    },
+    {
+      "id": "operations-4",
+      "category": "Operations",
+      "task": "Complete Connect integration and Brand shop connection"
+    },
+    {
+      "id": "operations-5",
+      "category": "Operations",
+      "task": "Double-check listed products in shop match the assortment in Shelf"
+    },
+    {
+      "id": "operations-6",
+      "category": "Operations",
+      "task": "Gather re-approval documents"
+    },
+    {
+      "id": "operations-7",
+      "category": "Operations",
+      "task": "Re-approval documents submitted"
+    },
+    {
+      "id": "operations-8",
+      "category": "Operations",
+      "task": "Brand Authorization & Category Qualification re-approved"
+    },
+    {
+      "id": "operations-9",
+      "category": "Operations",
+      "task": "Once BA & CQ is done, push the products live"
+    },
+    {
+      "id": "operations-10",
+      "category": "Operations",
+      "task": "Map product SKUs to Shelf as per Brand shop SKUs"
+    },
+    {
+      "id": "inventory-1",
+      "category": "Inventory",
+      "task": "Create demand plan for existing SKUs"
+    },
+    {
+      "id": "inventory-2",
+      "category": "Inventory",
+      "task": "Create demand plan for new hero SKUs and bundles"
+    },
+    {
+      "id": "inventory-3",
+      "category": "Inventory",
+      "task": "Combine demand plan with Amazon Business (if applicable)"
+    },
+    {
+      "id": "inventory-4",
+      "category": "Inventory",
+      "task": "Internal setup complete for all products"
+    },
+    {
+      "id": "inventory-5",
+      "category": "Inventory",
+      "task": "Cut PO for new hero SKUs, bundles, and any needed inventory for existing SKUs"
+    },
+    {
+      "id": "inventory-6",
+      "category": "Inventory",
+      "task": "New inventory received at Pattern"
+    },
+    {
+      "id": "inventory-7",
+      "category": "Inventory",
+      "task": "Cut PO for all products for FBT"
+    },
+    {
+      "id": "inventory-8",
+      "category": "Inventory",
+      "task": "New inventory received at FBT"
+    }
+  ],
   "steps": [
     {
       "category": "Subaccount Access",
@@ -226,114 +312,6 @@
       "id": "operations-1",
       "startOffset": 0,
       "dueOffset": 0
-    },
-    {
-      "category": "Operations",
-      "action": 2.0,
-      "task": "Create Brand in Shelf and list all products",
-      "owner": "Pattern",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-2",
-      "startOffset": 0,
-      "dueOffset": 3
-    },
-    {
-      "category": "Operations",
-      "action": 3.0,
-      "task": "Set up Connect integration for Brand shop with placeholder",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-3",
-      "startOffset": 3,
-      "dueOffset": 3
-    },
-    {
-      "category": "Operations",
-      "action": 4.0,
-      "task": "Complete Connect integration and Brand shop connection",
-      "owner": "Pattern",
-      "days": 8,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-4",
-      "startOffset": 3,
-      "dueOffset": 10
-    },
-    {
-      "category": "Operations",
-      "action": 5.0,
-      "task": "Double-check listed products in shop match the assortment in Shelf",
-      "owner": "Pattern",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-5",
-      "startOffset": 10,
-      "dueOffset": 13
-    },
-    {
-      "category": "Operations",
-      "action": 6.0,
-      "task": "Gather re-approval documents",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-6",
-      "startOffset": 13,
-      "dueOffset": 13
-    },
-    {
-      "category": "Operations",
-      "action": 7.0,
-      "task": "Re-approval documents submitted",
-      "owner": "Pattern",
-      "days": 2,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-7",
-      "startOffset": 13,
-      "dueOffset": 14
-    },
-    {
-      "category": "Operations",
-      "action": 8.0,
-      "task": "Brand Authorization & Category Qualification re-approved",
-      "owner": "Pattern",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-8",
-      "startOffset": 14,
-      "dueOffset": 17
-    },
-    {
-      "category": "Operations",
-      "action": 9.0,
-      "task": "Once BA & CQ is done, push the products live",
-      "owner": "Brand",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-9",
-      "startOffset": 17,
-      "dueOffset": 20
-    },
-    {
-      "category": "Operations",
-      "action": 10.0,
-      "task": "Map product SKUs to Shelf as per Brand shop SKUs",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-10",
-      "startOffset": 20,
-      "dueOffset": 20
     },
     {
       "category": "Operations",
@@ -646,102 +624,6 @@
       "id": "affiliate-15",
       "startOffset": 24,
       "dueOffset": 24
-    },
-    {
-      "category": "Inventory",
-      "action": 1.0,
-      "task": "Create demand plan for existing SKUs",
-      "owner": "Pattern",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-1",
-      "startOffset": 0,
-      "dueOffset": 3
-    },
-    {
-      "category": "Inventory",
-      "action": 2.0,
-      "task": "Create demand plan for new hero SKUs and bundles",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-2",
-      "startOffset": 3,
-      "dueOffset": 3
-    },
-    {
-      "category": "Inventory",
-      "action": 3.0,
-      "task": "Combine demand plan with Amazon Business (if applicable)",
-      "owner": "Pattern",
-      "days": 5,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-3",
-      "startOffset": 3,
-      "dueOffset": 7
-    },
-    {
-      "category": "Inventory",
-      "action": 4.0,
-      "task": "Internal setup complete for all products",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-4",
-      "startOffset": 7,
-      "dueOffset": 7
-    },
-    {
-      "category": "Inventory",
-      "action": 5.0,
-      "task": "Cut PO for new hero SKUs, bundles, and any needed inventory for existing SKUs",
-      "owner": "Pattern",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-5",
-      "startOffset": 7,
-      "dueOffset": 10
-    },
-    {
-      "category": "Inventory",
-      "action": 6.0,
-      "task": "New inventory received at Pattern",
-      "owner": "Pattern",
-      "days": 14,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-6",
-      "startOffset": 10,
-      "dueOffset": 23
-    },
-    {
-      "category": "Inventory",
-      "action": 7.0,
-      "task": "Cut PO for all products for FBT",
-      "owner": "Pattern",
-      "days": 34,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-7",
-      "startOffset": 23,
-      "dueOffset": 56
-    },
-    {
-      "category": "Inventory",
-      "action": 8.0,
-      "task": "New inventory received at FBT",
-      "owner": "Pattern",
-      "days": 16,
-      "status": "Not Started",
-      "notes": null,
-      "id": "inventory-8",
-      "startOffset": 56,
-      "dueOffset": 71
     },
     {
       "category": "Advertising",

@@ -7,7 +7,7 @@
   "asanaBrandTypes": [
     "3p"
   ],
-  "externalDoc": null,
+  "externalDoc": "https://docs.google.com/spreadsheets/d/1PIOtAY0U9dq3F3emFTSd7BqDuQgi8P1XUzRQZMSmgQo/edit?usp=sharing",
   "sourceFile": "source-templates/3p-new-shop.xlsx",
   "sourceAnchorDate": "2026-09-08",
   "plannedDurationDays": 63,
@@ -21,6 +21,7 @@
     "Brand Handles"
   ],
   "stepCount": 61,
+  "removedPerSOP": [],
   "steps": [
     {
       "category": "Shop Creation",
