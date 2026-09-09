@@ -44,3 +44,16 @@ redeploy. Then Zero Trust → Access → Applications → add the `*.pages.dev` 
 Allow policy for emails ending in `@pattern.com`.
 
 Served from anywhere else (GitHub Pages, local), it falls back to the paste-once token screen.
+
+## Editing timelines (Cloudflare KV)
+
+Edits made in the app (step dates, status, notes, plan start date, blocker note) are stored per
+brand in a KV namespace via `functions/api/overrides/[brand].js`. One-time setup:
+
+1. Cloudflare dashboard → **Storage & databases → KV** → **Create namespace** → name `pg-overrides`.
+2. Pages project → **Settings → Bindings → Add → KV namespace**: variable name `OVERRIDES`,
+   namespace `pg-overrides`. Save.
+3. **Deployments → Retry deployment** so the binding is picked up.
+
+Until the binding exists the app shows the plan read-only with a notice. Every edit records who
+made it (from the Cloudflare Access login) and when.

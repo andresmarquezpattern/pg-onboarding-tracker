@@ -59,6 +59,25 @@
   .g-today.lbl::after { content:'today'; position:absolute; top:-1px; left:4px; font-size:9.5px; color:var(--bad); font-weight:700; }
   .legend { display:flex; gap:14px; font-size:11.5px; color:var(--muted); margin:8px 0 0; flex-wrap:wrap; }
   .legend i { display:inline-block; width:12px; height:12px; border-radius:3px; vertical-align:-2px; margin-right:4px; }
+  .g-cell.step { display:flex; align-items:center; gap:6px; } .g-cell.step .task { flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .g-cell .dates { color:#94a3b8; font-size:11px; flex:none; }
+  .g-cell.editable { cursor:pointer; } .g-cell.editable:hover { background:#eef2ff; }
+  .g-bar.st-done { background:var(--ok) !important; opacity:1; } .g-bar.st-blocked { background:var(--bad) !important; opacity:1; } .g-bar.st-progress { outline:2px solid #1d4ed8; outline-offset:-2px; }
+  .g-bar.st-na { background:#cbd5e1 !important; color:#475569; }
+  .g-bar.overridden::after { content:'✎'; margin-left:4px; }
+  .g-head.month { border-right:1px solid var(--line); }
+  .note-box { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px; padding:10px 14px; font-size:12.5px; margin-top:12px; }
+  .note-box b { color:#9a3412; }
+  .toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px; }
+  .btn.light { background:#fff; color:#1e293b; border-color:#e2e8f0; } .btn.primary { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
+  .btn.on { background:#1d4ed8; border-color:#1d4ed8; color:#fff; }
+  dialog { border:none; border-radius:14px; padding:0; max-width:520px; width:96vw; box-shadow:0 20px 60px rgba(0,0,0,.25); }
+  dialog::backdrop { background:rgba(15,23,42,.45); }
+  .dlg { padding:22px 24px; } .dlg h3 { margin:0 0 4px; font-size:16px; } .dlg .sub { color:#64748b; font-size:12px; margin-bottom:14px; }
+  .dlg label { display:block; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#64748b; margin:10px 0 4px; }
+  .dlg input, .dlg select, .dlg textarea { width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:8px; font:inherit; font-size:13px; }
+  .dlg .row { display:flex; gap:12px; } .dlg .row > div { flex:1; }
+  .dlg .actions { display:flex; justify-content:space-between; gap:8px; margin-top:18px; }
   /* Token */
   #token-screen { display:none; position:fixed; inset:0; background:#0f172a; z-index:99; align-items:center; justify-content:center; padding:24px; }
   .token-card { background:#1e293b; border-radius:16px; padding:36px; max-width:460px; width:100%; text-align:center; color:#e2e8f0; }
@@ -90,6 +109,19 @@
   <button class="tab" data-v="roadmap" onclick="showView('roadmap')">🗺 Roadmap</button>
 </div>
 
+<dialog id="dlg"><form method="dialog" class="dlg" id="dlg-form" onsubmit="return saveStepEdit(event)">
+  <h3 id="dlg-title">Edit step</h3><div class="sub" id="dlg-sub"></div>
+  <div class="row"><div><label>Start</label><input type="date" id="dlg-start" required></div><div><label>Due</label><input type="date" id="dlg-due" required></div></div>
+  <label>Status</label><select id="dlg-status"><option>Not Started</option><option>In Progress</option><option>Blocked</option><option>Done</option><option>N/A</option></select>
+  <label>Note</label><textarea id="dlg-notes" rows="3" placeholder="Why did it move? Who is it waiting on?"></textarea>
+  <div class="actions"><button type="button" class="btn light" onclick="resetStepEdit()">Reset to template</button><span><button type="button" class="btn light" onclick="document.getElementById('dlg').close()">Cancel</button> <button type="submit" class="btn primary">Save</button></span></div>
+</form></dialog>
+<dialog id="dlg-brand"><form method="dialog" class="dlg" onsubmit="return saveBrandEdit(event)">
+  <h3>Edit plan settings</h3><div class="sub" id="dlgb-sub"></div>
+  <label>Plan start date (overrides Asana Date Signed)</label><input type="date" id="dlgb-anchor">
+  <label>Blocker / status note (shown on summary and brand page)</label><textarea id="dlgb-blocker" rows="3"></textarea>
+  <div class="actions"><button type="button" class="btn light" onclick="document.getElementById('dlgb-anchor').value='';document.getElementById('dlgb-blocker').value=''">Clear</button><span><button type="button" class="btn light" onclick="document.getElementById('dlg-brand').close()">Cancel</button> <button type="submit" class="btn primary">Save</button></span></div>
+</form></dialog>
 <main>
   <div class="loading" id="loading"><div class="spinner"></div><span id="loading-msg">Connecting to Asana…</span></div>
   <div id="view-summary" hidden></div>
@@ -130,7 +162,7 @@ function parentCompany(t) {
   const f=(t.custom_fields||[]).find(c=>/parent/i.test(c.name||'')); const v=f?(f.display_value||f.text_value||''):'';
   if (v && PG_PATTERN.test(v)) return {company:'P&G', via:'field'};
   if (t.parent?.name && PG_PATTERN.test(t.parent.name)) return {company:'P&G', via:'parent task'};
-  const m=/parent brand name[^\n]*\n\s*([^\n]+)/i.exec(t.notes||''); if (m && PG_PATTERN.test(m[1])) return {company:'P&G', via:'intake form'};
+  const m=/parent (?:company|brand name)[^\n]*\n\s*([^\n]+)/i.exec(t.notes||''); if (m && PG_PATTERN.test(m[1])) return {company:'P&G', via:'intake form'};
   const bn=norm(cf(t,CF.brandName)||t.name); if (bn && PG_NORM.some(b=>bn===b||bn.startsWith(b+' '))) return {company:'P&G', via:'registry'};
   return {company:null, via:null};
 }
@@ -164,7 +196,7 @@ const iso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-$
 const esc = s => String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
 
 /* ───────────── State ───────────── */
-let TEMPLATES = {}; let brands = []; let selected = null; let view='summary';
+let TEMPLATES = {}; let brands = []; let selected = null; let view='summary'; let editMode=false; let OVERRIDES_OK=false; let editing=null;
 
 /* ───────────── Load ───────────── */
 async function loadAll() {
@@ -183,9 +215,14 @@ async function loadAll() {
 
     M.textContent=`Loading stage history for ${pg.length} P&G brands…`;
     await Promise.all(pg.map(async t => {
-      const stories = await asanaAll(`/tasks/${t.gid}/stories`,{opt_fields:'resource_subtype,text,created_at',limit:100});
+      const stories = await asanaAll(`/tasks/${t.gid}/stories`,{opt_fields:'resource_subtype,text,created_at,created_by.name',limit:100});
       t._moves = [{date:d0(t.created_at), stage:'Signed – Day 0 Setup'}];
       for (const s of stories) if (s.resource_subtype==='section_changed') { const m=/to "([^"]+)"|to '([^']+)'/.exec(s.text||''); if (m) t._moves.push({date:d0(s.created_at), stage:m[1]||m[2]}); }
+      const comments = stories.filter(s=>s.resource_subtype==='comment_added');
+      const last = comments[comments.length-1];
+      t._lastComment = last ? { text:last.text||'', by:last.created_by?.name||'', at:last.created_at } : null;
+      t._overrides = { anchor:null, blocker:null, steps:{} };
+      if (PROXY) { try { const o = await (await fetch(`/api/overrides/${t.gid}`)).json(); OVERRIDES_OK = !!o.configured; if (o.configured) t._overrides = { anchor:o.anchor||null, blocker:o.blocker||null, steps:o.steps||{}, updatedAt:o.updatedAt, updatedBy:o.updatedBy }; } catch(e) {} }
     }));
     brands = pg.map(buildBrand).sort((a,b)=>a.anchor-b.anchor);
     document.getElementById('meta').textContent = `${brands.length} P&G brands of ${all.length} in Onboarding 2026 · updated ${new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}`;
@@ -201,14 +238,19 @@ function pickTemplate(brandType) {
 }
 function buildBrand(t) {
   const name=cf(t,CF.brandName)||t.name, brandType=cf(t,CF.brandType)||'', ds=cf(t,CF.dateSigned);
-  const anchor = ds ? d0(ds) : d0(t.created_at);
+  const ov = t._overrides || { anchor:null, blocker:null, steps:{} };
+  const anchorSrc = ov.anchor ? 'override' : ds ? 'Date Signed' : 'task created';
+  const anchor = ov.anchor ? d0(ov.anchor) : ds ? d0(ds) : d0(t.created_at);
   const {tpl,assumed}=pickTemplate(brandType);
-  const steps = tpl.steps.map(s=>({...s, start:addDays(anchor,s.startOffset), due:addDays(anchor,s.dueOffset)}));
-  const goLive = addDays(anchor, tpl.plannedDurationDays-1);
+  const steps = tpl.steps.map(s=>{ const o=ov.steps[s.id]||{}; return {...s, start:o.start?d0(o.start):addDays(anchor,s.startOffset), due:o.due?d0(o.due):addDays(anchor,s.dueOffset), status:o.status||s.status, notes:o.notes||s.notes, overridden:!!(o.start||o.due||o.status||o.notes)}; });
+  const goLive = new Date(Math.max(addDays(anchor, tpl.plannedDurationDays-1), ...steps.map(s=>s.due)));
+  const workingStatus = cf(t,CF.workingStatus)||null, onboardStatus = cf(t,CF.onboardStatus)||null;
   const live = t.completed && t._sec.live, blocked=t._sec.blocked, churned=t._sec.churned;
   const tdy=today(); const inStage = Math.max(0, diffDays(t._moves[t._moves.length-1].date, tdy));
   const health = churned?{k:'gray',l:'Churned'} : live?{k:'ok',l:'Live'} : blocked?{k:'bad',l:'Blocked'} : tdy>goLive?{k:'bad',l:'Behind plan'} : diffDays(tdy,goLive)<=7?{k:'warn',l:'Due this week'} : {k:'ok',l:'On plan'};
-  return { gid:t.gid, name, brandType, salesRep:cf(t,CF.salesRep)||'—', ops:t.assignee?.name||'—', blockerOwner:cf(t,CF.blockerOwner)||null,
+  const blockerOwner = cf(t,CF.blockerOwner)||null;
+  const blockerNote = ov.blocker || (blocked && t._lastComment ? t._lastComment.text : null);
+  return { gid:t.gid, raw:t, name, brandType, salesRep:cf(t,CF.salesRep)||'—', ops:t.assignee?.name||'—', blockerOwner, blockerNote, workingStatus, onboardStatus, lastComment:t._lastComment, ov, anchorSrc,
            signed:ds?d0(ds):null, anchor, stage:t._sec.name, step:t._sec.step, live, blocked, churned, inStage, moves:t._moves, permalink:t.permalink_url,
            tpl, assumed, steps, goLive, health, via:parentCompany(t).via, daysElapsed:diffDays(anchor,tdy) };
 }
@@ -235,7 +277,7 @@ function renderSummary() {
       <td><b>${esc(b.name)}</b></td><td>${esc(b.brandType||'—')}${b.assumed?' <span class="pill warn" title="No Brand Type in Asana; 3P New Shop template assumed">?</span>':''}</td>
       <td>${b.live?'✅ ':b.blocked?'🔴 ':''}${esc(b.stage)}</td><td>${b.inStage}d</td>
       <td><span class="pill ${b.health.k}">${b.health.l}</span></td><td>${fmt(b.signed)}</td><td>${fmt(b.goLive)}</td>
-      <td>${b.daysElapsed} / ${b.tpl.plannedDurationDays}</td><td>${esc(b.ops)}</td><td>${esc(b.salesRep)}</td><td>${b.blockerOwner?`<span class="pill bad">${esc(b.blockerOwner)}</span>`:'—'}</td></tr>`).join('')}
+      <td>${b.daysElapsed} / ${b.tpl.plannedDurationDays}</td><td>${esc(b.ops)}</td><td>${esc(b.salesRep)}</td><td style="max-width:320px;white-space:normal">${b.blockerOwner?`<span class="pill bad">${esc(b.blockerOwner)}</span> `:''}${b.blockerNote?`<span style="font-size:12px;color:#475569">${esc(b.blockerNote.slice(0,140))}${b.blockerNote.length>140?'…':''}</span>`:(b.blocked?'<span class="pill warn">no reason in Asana</span>':'—')}</td></tr>`).join('')}
     </tbody></table></div></div>`;
 }
 
@@ -243,27 +285,30 @@ function renderBrand() {
   const el=document.getElementById('view-brand'); const b=brands.find(x=>x.gid===selected)||brands[0];
   if (!b) { el.innerHTML='<div class="empty">No P&amp;G brands found.</div>'; return; }
   const tdy=today(); const first=b.tpl.categories[0];
-  const from=addDays(b.anchor,-2), to=addDays(new Date(Math.max(b.goLive, tdy)), 5), days=diffDays(from,to)+1, DW=22;
+  const from=addDays(new Date(Math.min(b.anchor, tdy)),-2), to=addDays(new Date(Math.max(b.goLive, tdy)), 5), days=diffDays(from,to)+1, DW=22, LEFT=470;
   const col = d => Math.max(0, diffDays(from,d));
-  // header rows: months + days
-  let months='', dayCells='', prev=''; for (let i=0;i<days;i++){ const d=addDays(from,i); const m=d.toLocaleDateString('en-US',{month:'short'}); months+=`<div class="g-head month">${m!==prev?m:''}</div>`; prev=m; dayCells+=`<div class="g-head" style="${d.getDay()%6===0?'background:#f1f5f9':''}">${d.getDate()}</div>`; }
-  const gridCols = `grid-template-columns: 340px repeat(${days}, ${DW}px)`;
+  // header: month cells span their days; day cells below
+  let months='', dayCells=''; { let i=0; while (i<days) { const d=addDays(from,i); let n=1; while (i+n<days && addDays(from,i+n).getMonth()===d.getMonth()) n++; months+=`<div class="g-head month" style="grid-column:span ${n}">${d.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>`; i+=n; } }
+  for (let i=0;i<days;i++){ const d=addDays(from,i); dayCells+=`<div class="g-head" style="${d.getDay()%6===0?'background:#f1f5f9':''}${diffDays(d,tdy)===0?';color:#ef4444;font-weight:700':''}">${d.getDate()}</div>`; }
+  const gridCols = `grid-template-columns: ${LEFT}px repeat(${days}, ${DW}px)`;
   const bar = (s,e,cls,label,title) => `<div class="g-bar ${cls}" title="${esc(title)}" style="left:${col(s)*DW}px;width:${Math.max(1,diffDays(s,e)+1)*DW-2}px">${esc(label)}</div>`;
   const todayLine = `<div class="g-today" style="left:${(col(tdy)+.5)*DW}px"></div>`; const todayLbl = todayLine.replace('g-today','g-today lbl');
   // actual (Asana) track
   const moves=b.moves; let actual='';
-  moves.forEach((m,i)=>{ const end = i+1<moves.length ? addDays(moves[i+1].date,-1) : (b.live ? moves[i].date : tdy); const cls = /live/i.test(m.stage)?'live':/block/i.test(m.stage)?'blocked':''; actual += bar(m.date, new Date(Math.max(end,m.date)), 'actual '+cls, m.stage, `${m.stage}: ${fmt(m.date)} → ${fmt(end)}`); });
-  let rows = `<div class="g-cell g-left g-cat">Actual — Asana stage history</div><div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px">${actual}${todayLbl}</div>`;
+  moves.forEach((m,i)=>{ const end = i+1<moves.length ? addDays(moves[i+1].date,-1) : (b.live ? moves[i].date : tdy); const cls = /live/i.test(m.stage)?'live':/block/i.test(m.stage)?'blocked':''; const e=new Date(Math.max(end,m.date)); const short = diffDays(m.date,e)+1 < 4 ? '' : m.stage; actual += bar(m.date, e, 'actual '+cls, short, `${m.stage}: ${fmt(m.date)} → ${fmt(e)}`); });
+  let rows = `<div class="g-cell g-left g-cat">Actual — Asana stage history <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#64748b">· now: ${esc(b.stage)}</span></div><div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px">${actual}${todayLbl}</div>`;
   // planned steps by category
   for (const cat of b.tpl.categories) {
-    rows += `<div class="g-cell g-left g-cat">${esc(cat)}${cat===first?' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#64748b">· tracked in Asana</span>':''}</div><div class="g-track g-cat" style="grid-column:2 / span ${days};--day:${DW}px">${todayLine}</div>`;
+    rows += `<div class="g-cell g-left g-cat">${esc(cat)}${cat===first?' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#64748b">· stage tracked in Asana</span>':''}</div><div class="g-track g-cat" style="grid-column:2 / span ${days};--day:${DW}px">${todayLine}</div>`;
     for (const s of b.steps.filter(s=>s.category===cat)) {
       const ownerCls = s.owner==='Pattern'?'Pattern':s.owner==='Brand'?'Brand':'Both';
-      const state = b.live ? 'done' : s.due<tdy ? 'late' : s.start>tdy ? 'future' : 'now';
-      rows += `<div class="g-cell g-left" title="${esc(s.task)}"><span style="color:#94a3b8;font-size:11px;margin-right:6px">${s.action}</span><span class="owner ${ownerCls}" style="margin-right:6px">${esc(s.owner)}</span>${esc(s.task)}</div>
-               <div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px">${bar(s.start,s.due,`${ownerCls} ${state==='future'?'future':''} ${state==='late'?'late':''}`, `${s.days}d`, `${s.task}\n${fmt(s.start)} → ${fmt(s.due)} (${s.days}d) · ${s.owner}${state==='late'?' · past planned due date':''}`)}${todayLine}</div>`;
+      const st = s.status==='Done'?'st-done':s.status==='Blocked'?'st-blocked':s.status==='In Progress'?'st-progress':s.status==='N/A'?'st-na':'';
+      const late = !st && !b.live && s.due<tdy, future = !st && s.start>tdy;
+      rows += `<div class="g-cell g-left step ${editMode?'editable':''}" title="${esc(s.task)}${s.notes?'\n'+esc(s.notes):''}" ${editMode?`onclick="openStepEdit('${s.id}')"`:''}><span style="color:#94a3b8;font-size:11px">${s.action}</span><span class="owner ${ownerCls}">${esc(s.owner)}</span><span class="task">${esc(s.task)}</span><span class="dates">${fmt(s.start)} → ${fmt(s.due)}${s.overridden?' ✎':''}${s.notes?' 💬':''}</span></div>
+               <div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px">${bar(s.start,s.due,`${ownerCls} ${st} ${future?'future':''} ${late?'late':''}`, `${diffDays(s.start,s.due)+1}d${s.status&&s.status!=='Not Started'?' · '+s.status:''}`, `${s.task}\n${fmt(s.start)} → ${fmt(s.due)} · ${s.owner} · ${s.status||'Not Started'}${late?'\nPast planned due date, not confirmed':''}${s.notes?'\n'+s.notes:''}`)}${todayLine}</div>`;
     }
   }
+  const lc = b.lastComment;
   el.innerHTML = `
     <div class="panel"><div class="brand-head">
       <div><div class="kv">Brand</div><select class="brand-sel" onchange="selected=this.value;render()">${brands.map(x=>`<option value="${x.gid}" ${x.gid===b.gid?'selected':''}>${esc(x.name)}</option>`).join('')}</select></div>
@@ -271,21 +316,52 @@ function renderBrand() {
       <div class="kv">Template<b>${esc(b.tpl.label)}${b.assumed?' <span class="pill warn">assumed</span>':''}</b></div>
       <div class="kv">Current stage<b>${b.live?'✅ ':b.blocked?'🔴 ':''}${esc(b.stage)} <span style="color:#64748b;font-weight:400">· ${b.inStage}d</span></b></div>
       <div class="kv">Health<b><span class="pill ${b.health.k}">${b.health.l}</span></b></div>
-      <div class="kv">Signed<b>${fmtY(b.signed)}</b></div>
-      <div class="kv">Planned go-live<b>${fmtY(b.goLive)} <span style="color:#64748b;font-weight:400">· day ${b.daysElapsed} of ${b.tpl.plannedDurationDays}</span></b></div>
+      <div class="kv">Plan start<b>${fmtY(b.anchor)} <span style="color:#64748b;font-weight:400">· ${esc(b.anchorSrc)}</span></b></div>
+      <div class="kv">Planned go-live<b>${fmtY(b.goLive)} <span style="color:#64748b;font-weight:400">· day ${b.daysElapsed} of ${diffDays(b.anchor,b.goLive)+1}</span></b></div>
       <div class="kv">Ops / Sales<b>${esc(b.ops)} / ${esc(b.salesRep)}</b></div>
       <div style="margin-left:auto;display:flex;gap:8px;align-self:center">
-        ${b.tpl.externalDoc?`<a class="btn" style="background:#fff;color:#1e293b;border-color:#e2e8f0" target="_blank" href="${b.tpl.externalDoc}">📄 External doc</a>`:''}
+        ${b.tpl.externalDoc?`<a class="btn light" target="_blank" href="${b.tpl.externalDoc}">📄 External doc</a>`:''}
         <a class="btn orange" target="_blank" href="${b.permalink}">↗ Open in Asana</a>
       </div>
-    </div></div>
-    <div class="panel"><h2>Timeline · ${esc(b.tpl.title)}</h2>
+    </div>
+    ${(b.blocked||b.blockerNote||b.blockerOwner)?`<div class="note-box"><b>🔴 Blocker</b> ${b.blockerOwner?`<span class="pill bad">${esc(b.blockerOwner)}</span> `:''}${b.blockerNote?esc(b.blockerNote):'<i>No reason recorded. Set "Blocker Owner" in Asana or add a note here.</i>'}${b.ov.blocker?' <span class="pill blue">manual note</span>':(lc&&b.blockerNote===lc.text?` <span style="color:#9a3412">— ${esc(lc.by)}, ${fmt(d0(lc.at))} (latest Asana comment)</span>`:'')}</div>`:''}
+    ${lc && (!b.blocked || b.blockerNote!==lc.text) ? `<div class="note-box" style="background:#f8fafc;border-color:#e2e8f0"><b style="color:#334155">💬 Latest Asana comment</b> ${esc(lc.text.slice(0,400))} <span style="color:#64748b">— ${esc(lc.by)}, ${fmt(d0(lc.at))}</span></div>`:''}
+    ${b.anchor>tdy?`<div class="note-box" style="background:#fefce8;border-color:#fde68a"><b style="color:#854d0e">⚠ Plan starts in the future</b> Asana Date Signed is ${fmtY(b.anchor)}, so all planned steps sit after today. Correct the date in Asana, or set a plan start date here.</div>`:''}
+    </div>
+    <div class="panel">
+      <div class="toolbar"><h2 style="margin:0;flex:1">Timeline · ${esc(b.tpl.title)}</h2>
+        ${PROXY?`<button class="btn light ${editMode?'on':''}" onclick="toggleEdit()">${editMode?'✓ Editing — click a step':'✎ Edit timeline'}</button><button class="btn light" onclick="openBrandEdit()">⚙ Plan settings</button>`:'<span style="color:#94a3b8;font-size:12px">Editing available on the Cloudflare site</span>'}
+      </div>
+      ${PROXY&&!OVERRIDES_OK?'<div class="note-box" style="margin:0 0 10px"><b>Editing is not enabled yet.</b> Bind a KV namespace named <code>OVERRIDES</code> to this Pages project (Settings → Bindings) and redeploy.</div>':''}
       <div class="gantt"><div class="g-grid" style="${gridCols}">
-        <div class="g-head g-left" style="grid-row:1 / span 2;background:#f8fafc;text-align:left;padding-left:10px;line-height:44px">Step · owner</div>${months}${dayCells}${rows}
+        <div class="g-head g-left" style="grid-row:1 / span 2;background:#f8fafc;text-align:left;padding-left:10px;line-height:44px">Step · owner · planned dates</div>${months}${dayCells}${rows}
       </div></div>
-      <div class="legend"><span><i style="background:var(--pattern)"></i>Pattern</span><span><i style="background:var(--brand)"></i>Brand</span><span><i style="background:var(--both)"></i>Pattern/Brand</span><span><i style="background:#0f172a"></i>Actual Asana stage</span><span><i style="border:2px solid var(--bad);background:#fff"></i>Past planned due, not confirmed</span><span><i style="background:var(--pattern);opacity:.45"></i>Future</span></div>
-      <p style="color:#64748b;font-size:12px;margin:10px 0 0">Planned dates come from the ${esc(b.tpl.label)} template anchored on the Date Signed. Detected as P&amp;G via ${esc(b.via)}.</p>
+      <div class="legend"><span><i style="background:var(--pattern)"></i>Pattern</span><span><i style="background:var(--brand)"></i>Brand</span><span><i style="background:var(--both)"></i>Pattern/Brand</span><span><i style="background:#0f172a"></i>Actual Asana stage</span><span><i style="background:var(--ok)"></i>Done</span><span><i style="background:var(--bad)"></i>Blocked</span><span><i style="border:2px solid #1d4ed8;background:#fff"></i>In progress</span><span><i style="border:2px solid var(--bad);background:#fff"></i>Past due, not confirmed</span><span><i style="background:var(--pattern);opacity:.45"></i>Future</span><span>✎ edited</span></div>
+      <p style="color:#64748b;font-size:12px;margin:10px 0 0">Planned dates come from the ${esc(b.tpl.label)} template anchored on ${esc(b.anchorSrc)} (${fmtY(b.anchor)}). Detected as P&amp;G via ${esc(b.via)}.${b.ov.updatedAt?` Last edited ${fmtY(d0(b.ov.updatedAt))}${b.ov.updatedBy?' by '+esc(b.ov.updatedBy):''}.`:''}</p>
     </div>`;
+}
+
+/* ───────────── Editing (stored in Cloudflare KV via /api/overrides) ───────────── */
+function toggleEdit(){ editMode=!editMode; render(); }
+function curBrand(){ return brands.find(x=>x.gid===selected)||brands[0]; }
+function openStepEdit(id){ const b=curBrand(); const s=b.steps.find(x=>x.id===id); if(!s) return; editing=id;
+  document.getElementById('dlg-title').textContent=`${s.action} · ${s.task}`; document.getElementById('dlg-sub').textContent=`${s.category} · ${s.owner} · template: ${fmt(addDays(b.anchor,s.startOffset))} → ${fmt(addDays(b.anchor,s.dueOffset))}`;
+  document.getElementById('dlg-start').value=iso(s.start); document.getElementById('dlg-due').value=iso(s.due); document.getElementById('dlg-status').value=s.status||'Not Started'; document.getElementById('dlg-notes').value=b.ov.steps[id]?.notes||'';
+  document.getElementById('dlg').showModal(); }
+async function saveStepEdit(ev){ ev.preventDefault(); const b=curBrand(); const st=document.getElementById('dlg-start').value, du=document.getElementById('dlg-due').value;
+  if (du<st) { alert('Due date is before start date.'); return false; }
+  b.ov.steps[editing]={ start:st, due:du, status:document.getElementById('dlg-status').value, notes:document.getElementById('dlg-notes').value.trim()||undefined };
+  await persist(b); document.getElementById('dlg').close(); return false; }
+async function resetStepEdit(){ const b=curBrand(); delete b.ov.steps[editing]; await persist(b); document.getElementById('dlg').close(); }
+function openBrandEdit(){ const b=curBrand(); document.getElementById('dlgb-sub').textContent=`${b.name} · Asana Date Signed: ${fmtY(b.signed)}`; document.getElementById('dlgb-anchor').value=b.ov.anchor||''; document.getElementById('dlgb-blocker').value=b.ov.blocker||''; document.getElementById('dlg-brand').showModal(); }
+async function saveBrandEdit(ev){ ev.preventDefault(); const b=curBrand(); b.ov.anchor=document.getElementById('dlgb-anchor').value||null; b.ov.blocker=document.getElementById('dlgb-blocker').value.trim()||null; await persist(b); document.getElementById('dlg-brand').close(); return false; }
+async function persist(b){
+  try {
+    const r=await fetch(`/api/overrides/${b.gid}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({anchor:b.ov.anchor,blocker:b.ov.blocker,steps:b.ov.steps})});
+    const d=await r.json(); if(!r.ok) throw new Error(d.error||r.status);
+    b.raw._overrides={anchor:d.anchor,blocker:d.blocker,steps:d.steps,updatedAt:d.updatedAt,updatedBy:d.updatedBy};
+    const i=brands.findIndex(x=>x.gid===b.gid); brands[i]=buildBrand(b.raw); render();
+  } catch(e){ alert('Could not save: '+e.message); }
 }
 
 function renderRoadmap() {
