@@ -87,6 +87,7 @@
   .token-card input { width:100%; padding:10px 12px; border:1px solid #334155; border-radius:8px; background:#0f172a; color:#fff; margin:12px 0; }
   .token-card button { width:100%; padding:10px; background:#6366f1; color:#fff; border:none; border-radius:8px; font-weight:600; cursor:pointer; }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 </head>
 <body>
 
@@ -276,7 +277,7 @@ function renderSummary() {
       <div class="card"><div class="lbl">Blocked</div><div class="val" style="color:var(--bad)">${blocked}</div><div class="sub">waiting / blocked</div></div>
       <div class="card"><div class="lbl">Behind plan</div><div class="val" style="color:${behind?'var(--bad)':'var(--ok)'}">${behind}</div><div class="sub">past planned go-live</div></div>
     </div>
-    <div class="panel"><h2>Brand status <span style="text-transform:none;letter-spacing:0;color:#94a3b8">(click a row for the timeline)</span></h2>
+    <div class="panel"><div class="toolbar"><h2 style="margin:0;flex:1">Brand status <span style="text-transform:none;letter-spacing:0;color:#94a3b8">(click a row for the timeline)</span></h2><button class="btn light" onclick="exportXlsx(brands)" title="One workbook, one tab per P&amp;G brand, same layout as the onboarding Gantt templates">⬇ Export all brands .xlsx</button></div>
     <div style="overflow-x:auto"><table><thead><tr><th>Brand</th><th>Type</th><th>Current stage</th><th>Days in stage</th><th>Health</th><th>Signed</th><th>Planned go-live</th><th>Plan complete</th><th>Day</th><th>Ops</th><th>Sales rep</th><th>Blocker</th></tr></thead><tbody>
     ${brands.map(b=>`<tr class="click" onclick="selected='${b.gid}';showView('brand')">
       <td><b>${esc(b.name)}</b></td><td>${esc(b.brandType||'—')}${b.assumed?' <span class="pill warn" title="No Brand Type in Asana; 3P New Shop template assumed">?</span>':''}</td>
@@ -336,6 +337,7 @@ function renderBrand() {
     </div>
     <div class="panel">
       <div class="toolbar"><h2 style="margin:0;flex:1">Timeline · ${esc(b.tpl.title)}</h2>
+        <button class="btn light" onclick="exportXlsx([curBrand()])" title="Download this brand's checklist + Gantt as Excel">⬇ Export .xlsx</button>
         <button class="btn light" onclick="toggleWrap()" title="Show full task names or one line per step">${wrapTasks?'▤ Compact rows':'▥ Expand task names'}</button>
         ${PROXY?`<button class="btn light ${editMode?'on':''}" onclick="toggleEdit()">${editMode?'✓ Editing — click a step':'✎ Edit timeline'}</button><button class="btn light" onclick="openBrandEdit()">⚙ Plan settings</button>`:'<span style="color:#94a3b8;font-size:12px">Editing available on the Cloudflare site</span>'}
       </div>
@@ -346,6 +348,49 @@ function renderBrand() {
       <div class="legend"><span><i style="background:var(--pattern)"></i>Pattern</span><span><i style="background:var(--brand)"></i>Brand</span><span><i style="background:var(--both)"></i>Pattern/Brand</span><span><i style="background:#0f172a"></i>Actual Asana stage</span><span><i style="background:var(--ok)"></i>Done</span><span><i style="background:var(--bad)"></i>Blocked</span><span><i style="border:2px solid #1d4ed8;background:#fff"></i>In progress</span><span><i style="border:2px solid var(--bad);background:#fff"></i>Past due, not confirmed</span><span><i style="background:var(--pattern);opacity:.45"></i>Future</span><span>✎ edited</span></div>
       <p style="color:#64748b;font-size:12px;margin:10px 0 0">Planned dates come from the ${esc(b.tpl.label)} template anchored on ${esc(b.anchorSrc)} (${fmtY(b.anchor)}). Detected as P&amp;G via ${esc(b.via)}.${b.ov.updatedAt?` Last edited ${fmtY(d0(b.ov.updatedAt))}${b.ov.updatedBy?' by '+esc(b.ov.updatedBy):''}.`:''}</p>
     </div>`;
+}
+
+/* ───────────── Excel export (same layout as the onboarding Gantt templates) ───────────── */
+async function exportXlsx(list) {
+  if (!window.ExcelJS) { alert('Excel library did not load. Check your connection and try again.'); return; }
+  const wb = new ExcelJS.Workbook(); wb.creator = 'P&G Onboarding Tracker';
+  const FILL = (hex) => ({ type:'pattern', pattern:'solid', fgColor:{ argb:'FF'+hex } });
+  const OWNER_HEX = { Pattern:'F97316', Brand:'0EA5E9', Both:'8B5CF6' };
+  const STATUS_HEX = { Done:'10B981', Blocked:'EF4444', 'In Progress':'1D4ED8', 'N/A':'CBD5E1' };
+  const tdy = today();
+  for (const b of list) {
+    const ws = wb.addWorksheet(b.name.replace(/[\[\]\*\?\/\\:]/g,' ').slice(0,31));
+    const from = addDays(new Date(Math.min(b.anchor, tdy)), -2), to = addDays(new Date(Math.max(b.planEnd, tdy)), 3), days = diffDays(from,to)+1;
+    const HEAD = ['Category','Action #','Task','Owner','Start','Due','Days','Status','Notes'];
+    ws.addRow([`${b.tpl.title} — ${b.name}`]).font = { bold:true, size:14 };
+    ws.addRow([`Plan start ${fmtY(b.anchor)} (${b.anchorSrc}) · Planned go-live ${fmtY(b.goLive)} · Plan complete ${fmtY(b.planEnd)} · Asana stage: ${b.stage} · exported ${fmtY(tdy)}`]).font = { color:{argb:'FF64748B'}, size:10 };
+    ws.addRow(['Bar colour = owner: Pattern (orange), Brand (blue), Pattern/Brand (purple). Green = Done, red = Blocked. Red column = today.']).font = { color:{argb:'FF64748B'}, size:10 };
+    // month + date header rows
+    const monthRow = HEAD.map(()=>''), dateRow = HEAD.map(()=>''), dowRow = [...HEAD];
+    for (let i=0;i<days;i++){ const d=addDays(from,i); monthRow.push(d.getDate()===1||i===0 ? d.toLocaleDateString('en-US',{month:'short'}) : ''); dateRow.push(d); dowRow.push('SMTWTFS'[d.getDay()]); }
+    ws.addRow(monthRow).font = { bold:true };
+    const dr = ws.addRow(dateRow); dr.eachCell((c,i)=>{ if(i>HEAD.length){ c.numFmt='d'; c.alignment={horizontal:'center'}; c.font={size:9,color:{argb:'FF64748B'}}; } });
+    const hr = ws.addRow(dowRow); hr.font = { bold:true }; hr.eachCell((c,i)=>{ c.fill = FILL(i<=HEAD.length?'F1F5F9':'F8FAFC'); c.alignment={horizontal:i>HEAD.length?'center':'left'}; });
+    // rows
+    for (const cat of b.tpl.categories) {
+      const cr = ws.addRow([cat]); cr.font = { bold:true }; cr.getCell(1).fill = FILL('E2E8F0');
+      for (const st of b.steps.filter(x=>x.category===cat)) {
+        const r = ws.addRow([cat, st.action, st.task + (st.id===b.tpl.goLiveStepId?'  ★ GO-LIVE':''), st.owner, st.start, st.due, diffDays(st.start,st.due)+1, st.status||'Not Started', st.notes||'']);
+        r.getCell(5).numFmt = 'mmm d, yyyy'; r.getCell(6).numFmt = 'mmm d, yyyy';
+        const ownerKey = st.owner==='Pattern'?'Pattern':st.owner==='Brand'?'Brand':'Both';
+        const hex = STATUS_HEX[st.status] || OWNER_HEX[ownerKey];
+        for (let i=0;i<days;i++){ const d=addDays(from,i); if (d>=st.start && d<=st.due) r.getCell(HEAD.length+1+i).fill = FILL(hex); }
+      }
+    }
+    // today column tint + widths + freeze
+    const tcol = HEAD.length + 1 + diffDays(from, tdy);
+    if (tcol > HEAD.length) ws.eachRow((row, n) => { if (n >= 6) { const c=row.getCell(tcol); if (!c.fill || c.fill.pattern!=='solid') c.fill = FILL('FEE2E2'); } });
+    ws.columns = [{width:16},{width:9},{width:58},{width:14},{width:13},{width:13},{width:7},{width:13},{width:30}, ...Array.from({length:days},()=>({width:3.2}))];
+    ws.views = [{ state:'frozen', xSplit:HEAD.length, ySplit:6 }];
+  }
+  const buf = await wb.xlsx.writeBuffer();
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  a.download = (list.length===1 ? `PG Onboarding - ${list[0].name}` : 'PG Onboarding - all brands') + ` - ${iso(tdy)}.xlsx`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
 }
 
 /* ───────────── Editing (stored in Cloudflare KV via /api/overrides) ───────────── */
