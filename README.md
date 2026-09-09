@@ -31,3 +31,16 @@ signed on any date gets a full planned timeline automatically.
 
 The dashboard never ships with a token. Each viewer pastes their own Asana Personal Access Token
 once; it is kept in the browser's localStorage only.
+
+## Hosting on Cloudflare Pages (no token prompt for viewers)
+
+`functions/api/asana/[[path]].js` is a read-only proxy. When the site is served from Cloudflare
+Pages with an `ASANA_TOKEN` secret set, the dashboard detects the proxy and skips the token
+screen. Viewer access is enforced with Cloudflare Access (pattern.com emails only).
+
+Setup: Workers & Pages → Create → Pages → Connect to Git → this repo. Build command empty,
+output directory `/`. Then Settings → Variables and Secrets → add `ASANA_TOKEN` (encrypt) and
+redeploy. Then Zero Trust → Access → Applications → add the `*.pages.dev` hostname with an
+Allow policy for emails ending in `@pattern.com`.
+
+Served from anywhere else (GitHub Pages, local), it falls back to the paste-once token screen.

@@ -80,7 +80,7 @@
   <div><h1>🧴 P&amp;G Onboarding Tracker</h1><div class="meta" id="meta">TikTok Shop · Procter &amp; Gamble portfolio</div></div>
   <div style="display:flex;gap:8px">
     <button class="btn" onclick="loadAll()">↻ Refresh</button>
-    <button class="btn" onclick="clearToken()">⚙ Token</button>
+    <button class="btn" id="token-btn" onclick="clearToken()">⚙ Token</button>
     <a class="btn orange" target="_blank" href="https://app.asana.com/1/953966021734988/project/1213113488679843/list">↗ Asana</a>
   </div>
 </header>
@@ -99,7 +99,8 @@
 
 <script>
 /* ───────────── Config (Asana Onboarding 2026) ───────────── */
-const ASANA = 'https://app.asana.com/api/1.0';
+let ASANA = 'https://app.asana.com/api/1.0';
+let PROXY = false; // true when served from Cloudflare Pages with the /api/asana proxy (no token needed)
 const OB_PROJECT = '1213113488679843';
 const SECTIONS = [
   { id:'1213113488679845', name:'Signed – Day 0 Setup',        step:1 },
@@ -138,10 +139,14 @@ function parentCompany(t) {
 const getToken = () => localStorage.getItem('pg_asana_pat') || '';
 function saveToken(){ const t=document.getElementById('pat').value.trim(); if(!t) return; localStorage.setItem('pg_asana_pat',t); document.getElementById('token-screen').style.display='none'; loadAll(); }
 function clearToken(){ localStorage.removeItem('pg_asana_pat'); document.getElementById('token-screen').style.display='flex'; }
+async function detectProxy() {
+  try { const r = await fetch('/api/asana/users/me', {headers:{Accept:'application/json'}}); if (r.ok) { PROXY = true; ASANA = location.origin + '/api/asana'; } } catch(e) {}
+  return PROXY;
+}
 async function asana(path, params={}) {
   const u=new URL(ASANA+path); Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
-  const r=await fetch(u,{headers:{Authorization:'Bearer '+getToken(),Accept:'application/json'}});
-  if (r.status===401){ clearToken(); throw new Error('Invalid token'); }
+  const r=await fetch(u, PROXY ? {headers:{Accept:'application/json'}} : {headers:{Authorization:'Bearer '+getToken(),Accept:'application/json'}});
+  if (r.status===401){ if (PROXY) throw new Error('Asana rejected the server token — ask the admin to rotate ASANA_TOKEN'); clearToken(); throw new Error('Invalid token'); }
   if (!r.ok) throw new Error('Asana '+r.status);
   return r.json();
 }
@@ -163,7 +168,7 @@ let TEMPLATES = {}; let brands = []; let selected = null; let view='summary';
 
 /* ───────────── Load ───────────── */
 async function loadAll() {
-  if (!getToken()) { document.getElementById('token-screen').style.display='flex'; return; }
+  if (!PROXY && !getToken()) { document.getElementById('token-screen').style.display='flex'; return; }
   const L=document.getElementById('loading'), M=document.getElementById('loading-msg');
   L.style.display='flex'; ['summary','brand','roadmap'].forEach(v=>document.getElementById('view-'+v).hidden=true);
   try {
@@ -304,7 +309,7 @@ function renderRoadmap() {
 }
 
 /* ───────────── Boot ───────────── */
-if (!getToken()) document.getElementById('token-screen').style.display='flex'; else loadAll();
+detectProxy().then(() => { if (PROXY) { document.getElementById('token-btn').style.display='none'; loadAll(); } else if (!getToken()) document.getElementById('token-screen').style.display='flex'; else loadAll(); });
 </script>
 </body>
 </html>
