@@ -51,6 +51,10 @@ TEMPLATES = {
 
 HEADER = ["Category", "Action #", "Task", "Owner", "Start", "Due", "Days", "Status", "Notes"]
 PIPELINE_CATEGORY = "Onboarding pipeline"
+# The checklist is the SOP and nothing else. The Excel files also carry commercial workstreams
+# (Operations, Inventory, Merchandising, Affiliate, Advertising, Brand Handles) that are not part
+# of the Internal Onboarding SOP; they are dropped and recorded under removedPerSOP.
+SOP_ONLY = True
 SOP = json.loads((SRC / "sop-pipeline.json").read_text())  # RACI tables from the Internal Onboarding SOP
 
 # Steps/categories removed per the Internal Onboarding SOP (07/31/2026). The source Excel
@@ -143,6 +147,9 @@ def convert(stem, meta):
                 "startOffset": day, "dueOffset": day + st["days"] - 1,
             })
         day += st["days"]
+    if SOP_ONLY:
+        removed += steps
+        steps = []
     steps = pipeline + steps
     categories = []
     for s in steps:

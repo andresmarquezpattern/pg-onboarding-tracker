@@ -334,7 +334,7 @@ function renderBrand() {
       <div class="kv">Health<b><span class="pill ${b.health.k}">${b.health.l}</span></b></div>
       <div class="kv">Plan start<b>${fmtY(b.anchor)} <span style="color:#64748b;font-weight:400">· ${esc(b.anchorSrc)}</span></b></div>
       <div class="kv">Planned go-live<b title="${esc(b.goLiveStep?b.goLiveStep.task:'')}">${fmtY(b.goLive)} <span style="color:#64748b;font-weight:400">· day ${b.daysElapsed} of ${diffDays(b.anchor,b.goLive)+1}</span></b></div>
-      <div class="kv">Plan complete<b>${fmtY(b.planEnd)} <span style="color:#64748b;font-weight:400">· all workstreams</span></b></div>
+      <div class="kv">Plan complete<b>${fmtY(b.planEnd)} <span style="color:#64748b;font-weight:400">· end of Binding</span></b></div>
       <div class="kv">Ops / Sales<b>${esc(b.ops)} / ${esc(b.salesRep)}</b></div>
       <div style="margin-left:auto;display:flex;gap:8px;align-self:center">
         ${b.tpl.externalDoc?`<a class="btn light" target="_blank" href="${b.tpl.externalDoc}">📄 External doc</a>`:''}
@@ -434,7 +434,7 @@ function renderRoadmap() {
   let weeks=''; for (let i=0;i<days;i++){ const d=addDays(from,i); weeks+=`<div class="g-head" style="font-size:9.5px">${d.getDay()===1?fmt(d):''}</div>`; }
   const rows = brands.map(b=>{
     const end = b.live ? b.moves[b.moves.length-1].date : tdy;
-    const tail=`<div class="g-bar" style="left:${col(b.goLive)*DW}px;width:${Math.max(1,diffDays(b.goLive,b.planEnd)+1)*DW-2}px;background:#e2e8f0;color:#64748b" title="Remaining workstreams to ${fmt(b.planEnd)}"></div>`;
+    const tail=`<div class="g-bar" style="left:${col(b.goLive)*DW}px;width:${Math.max(1,diffDays(b.goLive,b.planEnd)+1)*DW-2}px;background:#e2e8f0;color:#64748b" title="Binding, to ${fmt(b.planEnd)}"></div>`;
     const plan=tail+`<div class="g-bar ${b.live?'':'future'}" style="left:${col(b.anchor)*DW}px;width:${(diffDays(b.anchor,b.goLive)+1)*DW-2}px;background:#c7d2fe;color:#1e293b" title="Planned: ${fmt(b.anchor)} → go-live ${fmt(b.goLive)}">plan · go-live ${fmt(b.goLive)}</div>`;
     const act=`<div class="g-bar actual ${b.live?'live':b.blocked?'blocked':''}" style="left:${col(b.anchor)*DW}px;width:${Math.max(1,diffDays(b.anchor,end)+1)*DW-2}px;top:5px;height:9px;line-height:9px;font-size:0" title="Actual: ${fmt(b.anchor)} → ${fmt(end)} · ${b.stage}"></div>`;
     return `<div class="g-cell g-left" style="cursor:pointer" onclick="selected='${b.gid}';showView('brand')"><b>${esc(b.name)}</b> <span style="color:#64748b">· ${esc(b.stage)}</span> <span class="pill ${b.health.k}" style="margin-left:6px">${b.health.l}</span></div>
@@ -443,7 +443,7 @@ function renderRoadmap() {
   el.innerHTML = `<div class="panel"><h2>All P&amp;G brands · planned vs actual</h2>
     <div class="gantt"><div class="g-grid" style="grid-template-columns:340px repeat(${days},${DW}px)">
       <div class="g-head g-left" style="text-align:left;padding-left:10px">Brand · stage</div>${weeks}${rows}</div></div>
-    <div class="legend"><span><i style="background:#c7d2fe"></i>Planned to go-live (template)</span><span><i style="background:#e2e8f0"></i>Remaining workstreams to plan complete</span><span><i style="background:#0f172a"></i>Actual elapsed (Asana)</span><span><i style="background:var(--ok)"></i>Live</span><span><i style="background:var(--bad)"></i>Blocked</span></div></div>`;
+    <div class="legend"><span><i style="background:#c7d2fe"></i>Planned to go-live (template)</span><span><i style="background:#e2e8f0"></i>Binding (after go-live)</span><span><i style="background:#0f172a"></i>Actual elapsed (Asana)</span><span><i style="background:var(--ok)"></i>Live</span><span><i style="background:var(--bad)"></i>Blocked</span></div></div>`;
 }
 
 /* ───────────── Boot ───────────── */

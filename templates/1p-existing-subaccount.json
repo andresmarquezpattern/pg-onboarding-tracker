@@ -11,16 +11,11 @@
   "externalDoc": "https://docs.google.com/spreadsheets/d/1S5im6ljrQ5QXRgGdfeWESrOx0k2phriREoRRIvnzTWA/edit?usp=sharing",
   "sourceFile": "source-templates/1p-existing-subaccount.xlsx",
   "sourceAnchorDate": "2026-08-04",
-  "plannedDurationDays": 25,
+  "plannedDurationDays": 15,
   "categories": [
-    "Onboarding pipeline",
-    "Operations",
-    "Merchandising",
-    "Affiliate",
-    "Advertising",
-    "Brand Handles"
+    "Onboarding pipeline"
   ],
-  "stepCount": 67,
+  "stepCount": 32,
   "removedPerSOP": [
     {
       "id": "operations-2",
@@ -106,6 +101,181 @@
       "id": "inventory-8",
       "category": "Inventory",
       "task": "New inventory received at FBT"
+    },
+    {
+      "id": "operations-1",
+      "category": "Operations",
+      "task": "Send existing Product Listing details listed in shop"
+    },
+    {
+      "id": "operations-11",
+      "category": "Operations",
+      "task": "Place test order to check flow"
+    },
+    {
+      "id": "operations-12",
+      "category": "Operations",
+      "task": "Confirm order details are flowing to required teams & POCs"
+    },
+    {
+      "id": "merchandising-1",
+      "category": "Merchandising",
+      "task": "Align on new hero SKUs"
+    },
+    {
+      "id": "merchandising-2",
+      "category": "Merchandising",
+      "task": "Align on bundles (see Pattern recommendations in the H2 plan)"
+    },
+    {
+      "id": "merchandising-3",
+      "category": "Merchandising",
+      "task": "Gather image/copy assets for new hero SKUs and bundles"
+    },
+    {
+      "id": "merchandising-4",
+      "category": "Merchandising",
+      "task": "Audit existing live SKUs"
+    },
+    {
+      "id": "merchandising-5",
+      "category": "Merchandising",
+      "task": "Build and optimize listings for new hero SKUs and bundles"
+    },
+    {
+      "id": "merchandising-6",
+      "category": "Merchandising",
+      "task": "Optimize listing combinations"
+    },
+    {
+      "id": "merchandising-7",
+      "category": "Merchandising",
+      "task": "Confirm free shipping"
+    },
+    {
+      "id": "merchandising-8",
+      "category": "Merchandising",
+      "task": "Confirm discount floors for all SKUs and bundles"
+    },
+    {
+      "id": "merchandising-9",
+      "category": "Merchandising",
+      "task": "Align on discount calendar"
+    },
+    {
+      "id": "affiliate-1",
+      "category": "Affiliate",
+      "task": "Send existing briefs"
+    },
+    {
+      "id": "affiliate-2",
+      "category": "Affiliate",
+      "task": "Send existing affiliate partnership info - who are the top affiliates"
+    },
+    {
+      "id": "affiliate-3",
+      "category": "Affiliate",
+      "task": "Send existing affiliate partnership info - what are we offering top affiliates (increased commissions, retainer fees, challenges, etc.)"
+    },
+    {
+      "id": "affiliate-4",
+      "category": "Affiliate",
+      "task": "Send existing affiliate partnership info - is there a community channel (e.g. Discord) and who runs it"
+    },
+    {
+      "id": "affiliate-5",
+      "category": "Affiliate",
+      "task": "Send existing affiliate partnership info - what is brand involvement with top affiliates, webinars, etc."
+    },
+    {
+      "id": "affiliate-6",
+      "category": "Affiliate",
+      "task": "Product education session - Pattern team learns what makes the products unique"
+    },
+    {
+      "id": "affiliate-7",
+      "category": "Affiliate",
+      "task": "Find 20 new L3+ creators for launch (target 40 total videos)"
+    },
+    {
+      "id": "affiliate-8",
+      "category": "Affiliate",
+      "task": "20 new L3+ creator samples sent"
+    },
+    {
+      "id": "affiliate-9",
+      "category": "Affiliate",
+      "task": "Review and optimize existing briefs"
+    },
+    {
+      "id": "affiliate-10",
+      "category": "Affiliate",
+      "task": "Create new briefs for new hero SKUs"
+    },
+    {
+      "id": "affiliate-11",
+      "category": "Affiliate",
+      "task": "Finalize outreach messaging (Euka, email <L3, email >L3, Pattern retainer L4+)"
+    },
+    {
+      "id": "affiliate-12",
+      "category": "Affiliate",
+      "task": "Engage top 10-30 creators for retainers where applicable"
+    },
+    {
+      "id": "affiliate-13",
+      "category": "Affiliate",
+      "task": "Launch outreach"
+    },
+    {
+      "id": "affiliate-14",
+      "category": "Affiliate",
+      "task": "Existing creator retainers solidified"
+    },
+    {
+      "id": "affiliate-15",
+      "category": "Affiliate",
+      "task": "20 new L3+ creator videos live"
+    },
+    {
+      "id": "advertising-1",
+      "category": "Advertising",
+      "task": "Change advertising partnership type from Other to Media Agency"
+    },
+    {
+      "id": "advertising-2",
+      "category": "Advertising",
+      "task": "Approve partnership change"
+    },
+    {
+      "id": "advertising-3",
+      "category": "Advertising",
+      "task": "Confirm advertising operations"
+    },
+    {
+      "id": "advertising-4",
+      "category": "Advertising",
+      "task": "Launch ads"
+    },
+    {
+      "id": "brand-handles-1",
+      "category": "Brand Handles",
+      "task": "Confirm marketing account structure (must include LIVE and AIGC)"
+    },
+    {
+      "id": "brand-handles-2",
+      "category": "Brand Handles",
+      "task": "Launch additional marketing accounts needed"
+    },
+    {
+      "id": "brand-handles-3",
+      "category": "Brand Handles",
+      "task": "Link marketing accounts"
+    },
+    {
+      "id": "brand-handles-4",
+      "category": "Brand Handles",
+      "task": "Align on plan for LIVE and AIGC content for marketing accounts"
     }
   ],
   "replacedExcelCategory": {
@@ -590,426 +760,6 @@
       "stageIndex": 7,
       "startOffset": 13,
       "dueOffset": 14
-    },
-    {
-      "category": "Operations",
-      "action": 1.0,
-      "task": "Send existing Product Listing details listed in shop",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-1",
-      "startOffset": 0,
-      "dueOffset": 0
-    },
-    {
-      "category": "Operations",
-      "action": 11.0,
-      "task": "Place test order to check flow",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-11",
-      "startOffset": 20,
-      "dueOffset": 20
-    },
-    {
-      "category": "Operations",
-      "action": 12.0,
-      "task": "Confirm order details are flowing to required teams & POCs",
-      "owner": "Pattern",
-      "days": 5,
-      "status": "Not Started",
-      "notes": null,
-      "id": "operations-12",
-      "startOffset": 20,
-      "dueOffset": 24
-    },
-    {
-      "category": "Merchandising",
-      "action": 1.0,
-      "task": "Align on new hero SKUs",
-      "owner": "Pattern/Brand",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-1",
-      "startOffset": 0,
-      "dueOffset": 3
-    },
-    {
-      "category": "Merchandising",
-      "action": 2.0,
-      "task": "Align on bundles (see Pattern recommendations in the H2 plan)",
-      "owner": "Pattern/Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-2",
-      "startOffset": 3,
-      "dueOffset": 3
-    },
-    {
-      "category": "Merchandising",
-      "action": 3.0,
-      "task": "Gather image/copy assets for new hero SKUs and bundles",
-      "owner": "Brand",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-3",
-      "startOffset": 3,
-      "dueOffset": 6
-    },
-    {
-      "category": "Merchandising",
-      "action": 4.0,
-      "task": "Audit existing live SKUs",
-      "owner": "Pattern",
-      "days": 5,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-4",
-      "startOffset": 6,
-      "dueOffset": 10
-    },
-    {
-      "category": "Merchandising",
-      "action": 5.0,
-      "task": "Build and optimize listings for new hero SKUs and bundles",
-      "owner": "Pattern",
-      "days": 8,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-5",
-      "startOffset": 10,
-      "dueOffset": 17
-    },
-    {
-      "category": "Merchandising",
-      "action": 6.0,
-      "task": "Optimize listing combinations",
-      "owner": "Pattern/Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-6",
-      "startOffset": 17,
-      "dueOffset": 17
-    },
-    {
-      "category": "Merchandising",
-      "action": 7.0,
-      "task": "Confirm free shipping",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-7",
-      "startOffset": 17,
-      "dueOffset": 17
-    },
-    {
-      "category": "Merchandising",
-      "action": 8.0,
-      "task": "Confirm discount floors for all SKUs and bundles",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-8",
-      "startOffset": 17,
-      "dueOffset": 17
-    },
-    {
-      "category": "Merchandising",
-      "action": 9.0,
-      "task": "Align on discount calendar",
-      "owner": "Pattern/Brand",
-      "days": 6,
-      "status": "Not Started",
-      "notes": null,
-      "id": "merchandising-9",
-      "startOffset": 17,
-      "dueOffset": 22
-    },
-    {
-      "category": "Affiliate",
-      "action": 1.0,
-      "task": "Send existing briefs",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-1",
-      "startOffset": 0,
-      "dueOffset": 0
-    },
-    {
-      "category": "Affiliate",
-      "action": 2.0,
-      "task": "Send existing affiliate partnership info - who are the top affiliates",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-2",
-      "startOffset": 0,
-      "dueOffset": 0
-    },
-    {
-      "category": "Affiliate",
-      "action": 3.0,
-      "task": "Send existing affiliate partnership info - what are we offering top affiliates (increased commissions, retainer fees, challenges, etc.)",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-3",
-      "startOffset": 0,
-      "dueOffset": 0
-    },
-    {
-      "category": "Affiliate",
-      "action": 4.0,
-      "task": "Send existing affiliate partnership info - is there a community channel (e.g. Discord) and who runs it",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-4",
-      "startOffset": 0,
-      "dueOffset": 0
-    },
-    {
-      "category": "Affiliate",
-      "action": 5.0,
-      "task": "Send existing affiliate partnership info - what is brand involvement with top affiliates, webinars, etc.",
-      "owner": "Brand",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-5",
-      "startOffset": 0,
-      "dueOffset": 0
-    },
-    {
-      "category": "Affiliate",
-      "action": 6.0,
-      "task": "Product education session - Pattern team learns what makes the products unique",
-      "owner": "Brand",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-6",
-      "startOffset": 0,
-      "dueOffset": 3
-    },
-    {
-      "category": "Affiliate",
-      "action": 7.0,
-      "task": "Find 20 new L3+ creators for launch (target 40 total videos)",
-      "owner": "Pattern",
-      "days": 4,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-7",
-      "startOffset": 3,
-      "dueOffset": 6
-    },
-    {
-      "category": "Affiliate",
-      "action": 8.0,
-      "task": "20 new L3+ creator samples sent",
-      "owner": "Pattern",
-      "days": 2,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-8",
-      "startOffset": 6,
-      "dueOffset": 7
-    },
-    {
-      "category": "Affiliate",
-      "action": 9.0,
-      "task": "Review and optimize existing briefs",
-      "owner": "Pattern",
-      "days": 11,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-9",
-      "startOffset": 7,
-      "dueOffset": 17
-    },
-    {
-      "category": "Affiliate",
-      "action": 10.0,
-      "task": "Create new briefs for new hero SKUs",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-10",
-      "startOffset": 17,
-      "dueOffset": 17
-    },
-    {
-      "category": "Affiliate",
-      "action": 11.0,
-      "task": "Finalize outreach messaging (Euka, email <L3, email >L3, Pattern retainer L4+)",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-11",
-      "startOffset": 17,
-      "dueOffset": 17
-    },
-    {
-      "category": "Affiliate",
-      "action": 12.0,
-      "task": "Engage top 10-30 creators for retainers where applicable",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-12",
-      "startOffset": 17,
-      "dueOffset": 17
-    },
-    {
-      "category": "Affiliate",
-      "action": 13.0,
-      "task": "Launch outreach",
-      "owner": "Pattern",
-      "days": 8,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-13",
-      "startOffset": 17,
-      "dueOffset": 24
-    },
-    {
-      "category": "Affiliate",
-      "action": 14.0,
-      "task": "Existing creator retainers solidified",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-14",
-      "startOffset": 24,
-      "dueOffset": 24
-    },
-    {
-      "category": "Affiliate",
-      "action": 15.0,
-      "task": "20 new L3+ creator videos live",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "affiliate-15",
-      "startOffset": 24,
-      "dueOffset": 24
-    },
-    {
-      "category": "Advertising",
-      "action": 1.0,
-      "task": "Change advertising partnership type from Other to Media Agency",
-      "owner": "Pattern",
-      "days": 23,
-      "status": "Not Started",
-      "notes": null,
-      "id": "advertising-1",
-      "startOffset": 0,
-      "dueOffset": 22
-    },
-    {
-      "category": "Advertising",
-      "action": 2.0,
-      "task": "Approve partnership change",
-      "owner": "Brand",
-      "days": 2,
-      "status": "Not Started",
-      "notes": null,
-      "id": "advertising-2",
-      "startOffset": 22,
-      "dueOffset": 23
-    },
-    {
-      "category": "Advertising",
-      "action": 3.0,
-      "task": "Confirm advertising operations",
-      "owner": "Pattern",
-      "days": 2,
-      "status": "Not Started",
-      "notes": null,
-      "id": "advertising-3",
-      "startOffset": 23,
-      "dueOffset": 24
-    },
-    {
-      "category": "Advertising",
-      "action": 4.0,
-      "task": "Launch ads",
-      "owner": "Pattern",
-      "days": 1,
-      "status": "Not Started",
-      "notes": null,
-      "id": "advertising-4",
-      "startOffset": 24,
-      "dueOffset": 24
-    },
-    {
-      "category": "Brand Handles",
-      "action": 1.0,
-      "task": "Confirm marketing account structure (must include LIVE and AIGC)",
-      "owner": "Pattern/Brand",
-      "days": 11,
-      "status": "Not Started",
-      "notes": null,
-      "id": "brand-handles-1",
-      "startOffset": 0,
-      "dueOffset": 10
-    },
-    {
-      "category": "Brand Handles",
-      "action": 2.0,
-      "task": "Launch additional marketing accounts needed",
-      "owner": "Brand",
-      "days": 8,
-      "status": "Not Started",
-      "notes": null,
-      "id": "brand-handles-2",
-      "startOffset": 10,
-      "dueOffset": 17
-    },
-    {
-      "category": "Brand Handles",
-      "action": 3.0,
-      "task": "Link marketing accounts",
-      "owner": "Pattern/Brand",
-      "days": 6,
-      "status": "Not Started",
-      "notes": null,
-      "id": "brand-handles-3",
-      "startOffset": 17,
-      "dueOffset": 22
-    },
-    {
-      "category": "Brand Handles",
-      "action": 4.0,
-      "task": "Align on plan for LIVE and AIGC content for marketing accounts",
-      "owner": "Pattern/Brand",
-      "days": 3,
-      "status": "Not Started",
-      "notes": null,
-      "id": "brand-handles-4",
-      "startOffset": 22,
-      "dueOffset": 24
     }
   ]
 }

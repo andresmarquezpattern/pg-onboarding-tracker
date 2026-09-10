@@ -27,11 +27,12 @@ python3 scripts/convert_templates.py
 Dates in the JSON are stored as **day offsets from the template's first Start date**, so a brand
 signed on any date gets a full planned timeline automatically.
 
-The first category of every template ("Onboarding pipeline") is **not** taken from the Excel
-files: it is generated from `source-templates/sop-pipeline.json`, a transcription of the RACI
+Each template's checklist is **only** the onboarding pipeline defined by the SOP; it is generated from `source-templates/sop-pipeline.json`, a transcription of the RACI
 tables in the Internal Onboarding SOP (Lark, 07/31/2026 update) — one step per bullet, owner =
 Sales / Brand / Operations / SCM / TikTok, and every step in a stage shares the stage's window
-(upper bound of the SOP estimate). Update that JSON when the SOP changes.
+(upper bound of the SOP estimate). Update that JSON when the SOP changes. The commercial workstreams in the Excel files (Operations,
+Inventory, Merchandising, Affiliate, Advertising, Brand Handles) are not part of the SOP and are
+excluded (`SOP_ONLY = True` in the converter); each JSON lists them under `removedPerSOP`.
 
 The `DROP` table in the script removes steps that contradict the Internal Onboarding SOP
 (07/31/2026): the Inventory category and Shelf-catalog steps for both 1P flows, the CQ/BA

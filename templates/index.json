@@ -5,18 +5,12 @@
     "asanaBrandTypes": [
       "3p"
     ],
-    "plannedDurationDays": 63,
+    "plannedDurationDays": 34,
     "goLiveStepId": "pipeline-36",
     "goLiveOffset": 31,
-    "stepCount": 82,
+    "stepCount": 41,
     "categories": [
-      "Onboarding pipeline",
-      "Operations",
-      "Inventory",
-      "Merchandising",
-      "Affiliate",
-      "Advertising",
-      "Brand Handles"
+      "Onboarding pipeline"
     ]
   },
   {
@@ -26,18 +20,12 @@
       "ein transfer",
       "3p - existing"
     ],
-    "plannedDurationDays": 73,
+    "plannedDurationDays": 57,
     "goLiveStepId": "pipeline-31",
     "goLiveOffset": 54,
-    "stepCount": 88,
+    "stepCount": 36,
     "categories": [
-      "Onboarding pipeline",
-      "Operations",
-      "Merchandising",
-      "Affiliate",
-      "Inventory",
-      "Advertising",
-      "Brand Handles"
+      "Onboarding pipeline"
     ]
   },
   {
@@ -49,14 +37,9 @@
     "plannedDurationDays": 34,
     "goLiveStepId": "pipeline-33",
     "goLiveOffset": 31,
-    "stepCount": 74,
+    "stepCount": 38,
     "categories": [
-      "Onboarding pipeline",
-      "Operations",
-      "Merchandising",
-      "Affiliate",
-      "Advertising",
-      "Brand Handles"
+      "Onboarding pipeline"
     ]
   },
   {
@@ -66,17 +49,12 @@
       "existing shop",
       "hybrid"
     ],
-    "plannedDurationDays": 25,
+    "plannedDurationDays": 15,
     "goLiveStepId": "pipeline-27",
     "goLiveOffset": 12,
-    "stepCount": 67,
+    "stepCount": 32,
     "categories": [
-      "Onboarding pipeline",
-      "Operations",
-      "Merchandising",
-      "Affiliate",
-      "Advertising",
-      "Brand Handles"
+      "Onboarding pipeline"
     ]
   }
 ]
