@@ -285,7 +285,11 @@ function renderSummary() {
       <div class="card"><div class="lbl">Blocked</div><div class="val" style="color:var(--bad)">${blocked}</div><div class="sub">waiting / blocked</div></div>
       <div class="card"><div class="lbl">Behind plan</div><div class="val" style="color:${behind?'var(--bad)':'var(--ok)'}">${behind}</div><div class="sub">past planned go-live</div></div>
     </div>
-    <div class="panel"><div class="toolbar"><h2 style="margin:0;flex:1">Brand status <span style="text-transform:none;letter-spacing:0;color:#94a3b8">(click a row for the timeline)</span></h2><button class="btn light" onclick="exportXlsx(brands)" title="One workbook, one tab per P&amp;G brand, same layout as the onboarding Gantt templates">⬇ Export all brands .xlsx</button></div>
+    <div class="panel"><div class="toolbar"><h2 style="margin:0;flex:1">Brand status <span style="text-transform:none;letter-spacing:0;color:#94a3b8">(click a row for the timeline)</span></h2><span style="display:flex;gap:6px;align-items:center;font-size:12px;color:#64748b;border:1px solid #e2e8f0;border-radius:8px;padding:4px 8px;background:#fff">Blank template
+        <select id="tpl-pick" style="font-size:12px;padding:4px 6px;border:1px solid #e2e8f0;border-radius:6px">${Object.values(TEMPLATES).map(t=>`<option value="${t.id}">${esc(t.label)}</option>`).join('')}</select>
+        <input type="date" id="tpl-date" value="${iso(today())}" style="font-size:12px;padding:3px 6px;border:1px solid #e2e8f0;border-radius:6px" title="Plan start date (defaults to today)">
+        <button class="btn light" onclick="exportBlankTemplate()" title="Download an empty SOP checklist for this onboarding type, dated from the chosen start day">⬇ Download</button></span>
+      <button class="btn light" onclick="exportXlsx(brands)" title="One workbook, one tab per P&amp;G brand, same layout as the onboarding Gantt templates">⬇ Export all brands .xlsx</button></div>
     <div style="overflow-x:auto"><table><thead><tr><th>Brand</th><th>Type</th><th>Current stage</th><th>Days in stage</th><th>Health</th><th>Signed</th><th>Planned go-live</th><th>Plan complete</th><th>Day</th><th>Ops</th><th>Sales rep</th><th>Blocker</th></tr></thead><tbody>
     ${brands.map(b=>`<tr class="click" onclick="selected='${b.gid}';showView('brand')">
       <td><b>${esc(b.name)}</b></td><td>${esc(b.brandType||'—')}${b.assumed?' <span class="pill warn" title="No Brand Type in Asana; 3P New Shop template assumed">?</span>':''}</td>
@@ -361,7 +365,7 @@ function renderBrand() {
 }
 
 /* ───────────── Excel export (same layout as the onboarding Gantt templates) ───────────── */
-async function exportXlsx(list) {
+async function exportXlsx(list, filename) {
   if (!window.ExcelJS) { alert('Excel library did not load. Check your connection and try again.'); return; }
   const wb = new ExcelJS.Workbook(); wb.creator = 'P&G Onboarding Tracker';
   const FILL = (hex) => ({ type:'pattern', pattern:'solid', fgColor:{ argb:'FF'+hex } });
@@ -373,7 +377,9 @@ async function exportXlsx(list) {
     const from = addDays(new Date(Math.min(b.anchor, tdy)), -2), to = addDays(new Date(Math.max(b.planEnd, tdy)), 3), days = diffDays(from,to)+1;
     const HEAD = ['Category','Action #','Task','Owner','Start','Due','Days','Status','Notes'];
     ws.addRow([`${b.tpl.title} — ${b.name}`]).font = { bold:true, size:14 };
-    ws.addRow([`Plan start ${fmtY(b.anchor)} (${b.anchorSrc}) · Planned go-live ${fmtY(b.goLive)} · Plan complete ${fmtY(b.planEnd)} · Asana stage: ${b.stage} · exported ${fmtY(tdy)}`]).font = { color:{argb:'FF64748B'}, size:10 };
+    ws.addRow([b.gid==='template'
+      ? `Blank SOP checklist · plan start ${fmtY(b.anchor)} · planned go-live ${fmtY(b.goLive)} (day ${diffDays(b.anchor,b.goLive)+1}) · checklist ends ${fmtY(b.planEnd)} · generated ${fmtY(tdy)}`
+      : `Plan start ${fmtY(b.anchor)} (${b.anchorSrc}) · Planned go-live ${fmtY(b.goLive)} · Plan complete ${fmtY(b.planEnd)} · Asana stage: ${b.stage} · exported ${fmtY(tdy)}`]).font = { color:{argb:'FF64748B'}, size:10 };
     ws.addRow(['Bar colour = owner: Sales (teal), Brand (blue), Operations/Pattern (orange), SCM (purple), TikTok (black), Pattern/Brand (violet). Green = Done, red = Blocked. Pink column = today.']).font = { color:{argb:'FF64748B'}, size:10 };
     // month + date header rows
     const monthRow = HEAD.map(()=>''), dateRow = HEAD.map(()=>''), dowRow = [...HEAD];
@@ -399,7 +405,19 @@ async function exportXlsx(list) {
   }
   const buf = await wb.xlsx.writeBuffer();
   const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
-  a.download = (list.length===1 ? `PG Onboarding - ${list[0].name}` : 'PG Onboarding - all brands') + ` - ${iso(tdy)}.xlsx`; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+  a.download = (filename || (list.length===1 ? `PG Onboarding - ${list[0].name} - ${iso(tdy)}` : `PG Onboarding - all brands - ${iso(tdy)}`)) + '.xlsx'; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+}
+
+function blankBrandFromTemplate(tplId, startIso) {
+  const tpl = TEMPLATES[tplId]; const anchor = d0(startIso);
+  const steps = tpl.steps.map(s=>({...s, start:addDays(anchor,s.startOffset), due:addDays(anchor,s.dueOffset), status:'Not Started', notes:null, overridden:false}));
+  const goLiveStep = steps.find(s=>s.id===tpl.goLiveStepId);
+  return { gid:'template', name:`${tpl.label} template`, tpl, anchor, anchorSrc:'template start date', steps, goLiveStep, goLive:goLiveStep.due, planEnd:new Date(Math.max(...steps.map(s=>s.due))), stage:'—', live:false, blocked:false, ov:{anchor:null,blocker:null,steps:{}} };
+}
+async function exportBlankTemplate() {
+  const id = document.getElementById('tpl-pick').value, d = document.getElementById('tpl-date').value || iso(today());
+  const b = blankBrandFromTemplate(id, d);
+  await exportXlsx([b], `SOP checklist - ${b.tpl.label} - start ${d}`);
 }
 
 /* ───────────── Editing (stored in Cloudflare KV via /api/overrides) ───────────── */
