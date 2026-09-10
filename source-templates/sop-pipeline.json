@@ -1,0 +1,206 @@
+{
+  "_source": "Internal Onboarding SOP - Update Date 07/31/2026 (Lark doc, RACI tables per flow; captured 2026-09-10)",
+  "_durations": "days = upper bound of the SOP estimate; all steps in a stage share the stage window; stages run sequentially",
+  "3p-new-shop": {
+    "goLive": "Mark live once audit passes",
+    "stages": [
+      { "name": "Signed – Day 0 setup", "days": 2, "steps": [
+        ["Sales", "Generate onboarding package and send to brand to fulfill"],
+        ["Sales", "Provide wholesale price (prerequisite for initial PO)"] ] },
+      { "name": "Requirements received", "days": 2, "steps": [
+        ["Sales", "Submit Asana onboarding form"],
+        ["Brand", "Update onboarding package"],
+        ["Brand", "Share required documents"],
+        ["Brand", "First collab with Pattern: Finance NetSuite Setup form"],
+        ["Operations", "OPM assigned once docs are received, to initiate onboarding"],
+        ["Operations", "Set up an internal Lark group to streamline communication (auto)"] ] },
+      { "name": "Routing & AM assignment", "days": 2, "steps": [
+        ["Operations", "Confirm brand routing & AM (skip if AM already set)"],
+        ["Operations", "Confirm supporting TikTok team"],
+        ["Operations", "Request onboarding link"],
+        ["SCM", "AM assigned to brand"],
+        ["TikTok", "Confirmed as supporting team"],
+        ["TikTok", "Provides onboarding link"] ] },
+      { "name": "Shop build", "days": 7, "steps": [
+        ["Operations", "Create & whitelist brand email"],
+        ["Operations", "Create & set up shop (warehouse, tax, finance)"],
+        ["Operations", "Resolve deactivation issues"],
+        ["Operations", "Update Marketplace Seller in Shelf + Connect"],
+        ["Operations", "Once built, use shop code to get SKM verification (Catherine)"],
+        ["TikTok", "Support resolves shop deactivation issues"] ] },
+      { "name": "CQ & brand authorization", "days": 5, "steps": [
+        ["Operations", "Complete CQ & brand authorization"],
+        ["Operations", "Escalate to TikTok Support if still blocked"],
+        ["Brand", "Provide corrected documents if CQ/BA is rejected"],
+        ["SCM", "AM helps resolve rejected CQ/BA docs with brand"],
+        ["TikTok", "Support handles escalated CQ/BA rejections"] ] },
+      { "name": "Product listing", "days": 5, "steps": [
+        ["Operations", "Create Shelf listing"],
+        ["Operations", "Create Marketplace listing"],
+        ["Operations", "Sync Shelf once Marketplace listing exists"] ] },
+      { "name": "Waiting for inventory", "days": 7, "steps": [
+        ["SCM", "Confirm wholesale price"],
+        ["SCM", "Get finance team confirmation"],
+        ["SCM", "Place PO"],
+        ["Brand", "Ship inventory to warehouse"],
+        ["Operations", "Sync inventory on arrival"],
+        ["Operations", "Resolve sync issues with Fulfillment team"] ] },
+      { "name": "Final check / live", "days": 2, "steps": [
+        ["Operations", "Request audit from Ops Team Lead"],
+        ["Operations", "Mark live once audit passes"],
+        ["Operations", "Mark task complete once live"] ] },
+      { "name": "Binding", "days": 2, "steps": [
+        ["Operations", "Connect TikTok handle"],
+        ["Operations", "Add CS & account-health email, notify teams"],
+        ["SCM", "File Ops task to create Euka / IPPC accounts"],
+        ["Operations", "Create Euka / IPPC accounts (from SCM task)"] ] }
+    ]
+  },
+  "3p-existing-ein-transfer": {
+    "goLive": "Confirm all tracks verified, begin fulfilling orders",
+    "stages": [
+      { "name": "Signed – Day 0", "days": 2, "steps": [
+        ["Sales", "Generate onboarding package, send to brand"],
+        ["Sales", "Provide wholesale price"] ] },
+      { "name": "Requirements received", "days": 5, "steps": [
+        ["Sales", "Submit Asana onboarding form"],
+        ["Brand", "Complete onboarding package"],
+        ["Brand", "Confirm eligibility checklist items"],
+        ["Operations", "OPM assigned once docs received"],
+        ["Operations", "Set up an internal Lark group to streamline communication (auto)"] ] },
+      { "name": "Routing & AM assignment", "days": 2, "steps": [
+        ["Operations", "Confirm brand routing & TikTok team"],
+        ["SCM", "Adam assigns an SCM to the brand"],
+        ["TikTok", "Confirmed as supporting team"] ] },
+      { "name": "Entity transfer initiation", "days": 14, "steps": [
+        ["Brand", "Owner logs into Seller Center & starts request"],
+        ["Brand", "Completes OTP verification"],
+        ["Operations", "Submit new owner (Pattern) entity info"],
+        ["Operations", "Get Novation Agreement from Legal, obtain signatures"],
+        ["Brand", "Signs Novation Agreement"],
+        ["Operations", "Upload & submit for TikTok review"] ] },
+      { "name": "TikTok review", "days": 14, "steps": [
+        ["TikTok", "Reviews & approves entity/EIN transfer"],
+        ["Operations", "Re-verify or escalate to AM if rejected"],
+        ["TikTok", "Handles re-verification if rejected"] ] },
+      { "name": "Shelf listing & finance approval", "days": 5, "steps": [
+        ["Operations", "Build/find Master Product & Listing on Shelf, route to Finance"],
+        ["SCM", "Confirm wholesale price + finance sign-off"],
+        ["SCM", "Place PO"] ] },
+      { "name": "Post-approval cleanup", "days": 7, "steps": [
+        ["TikTok", "Auto-invalidates BA/CQ, freezes withdrawals 24h, unbinds bank accounts"],
+        ["Operations", "Bind new bank account"],
+        ["Operations", "Re-apply for BA/CQ under Pattern"],
+        ["Operations", "Reactivate products once approved"] ] },
+      { "name": "Integration cleanup", "days": 4, "steps": [
+        ["Operations", "Remove old SKUs from Connect"],
+        ["Operations", "Map listings to Pattern SKUs"],
+        ["Operations", "Verify Shelf/TTS/Connect sync"] ] },
+      { "name": "Fulfillment go-live", "days": 2, "steps": [
+        ["SCM", "Confirm inventory with John (Inventory POC)"],
+        ["Operations", "Confirm all tracks verified, begin fulfilling orders"] ] },
+      { "name": "Binding", "days": 2, "steps": [
+        ["Operations", "Unlink previous agency (if any)"],
+        ["Operations", "Connect handle, add CS/AH email"],
+        ["Operations", "Work with AM on binding"],
+        ["SCM", "File Ops task for Euka/IPPC accounts"],
+        ["Operations", "Create Euka/IPPC accounts"] ] }
+    ]
+  },
+  "1p-new-shop": {
+    "goLive": "Mark live once audit passes",
+    "stages": [
+      { "name": "Signed – Day 0 setup", "days": 2, "steps": [
+        ["Sales", "Generate onboarding package (Sales / Brand Manager)"],
+        ["Sales", "Submit Asana onboarding form"] ] },
+      { "name": "Requirements received", "days": 2, "steps": [
+        ["Brand", "Update onboarding package"],
+        ["Brand", "Share required documents"],
+        ["Operations", "OPM assigned once docs are received, to initiate onboarding"],
+        ["Operations", "Set up an internal Lark group to streamline communication (auto)"] ] },
+      { "name": "Routing & AM assignment", "days": 2, "steps": [
+        ["Operations", "Identify routing & confirm AM (skip if already assigned)"],
+        ["Operations", "Confirm supporting TikTok team"],
+        ["Operations", "Request onboarding link"],
+        ["SCM", "Confirm AM assignment for the brand"],
+        ["TikTok", "Confirmed as supporting team"],
+        ["TikTok", "Provides onboarding link"] ] },
+      { "name": "Shop build", "days": 7, "steps": [
+        ["Operations", "Create & whitelist brand email"],
+        ["Operations", "Confirm shop details in package match 1P setup"],
+        ["Operations", "Create shop, complete setup (warehouse, tax, finance)"],
+        ["Brand", "Confirm shipping template (fee & region)"],
+        ["Brand", "Confirm fulfillment platform (Shopify / Amazon MCF / Weebee / other)"],
+        ["Operations", "Confirm shipping template & fulfillment platform with brand"],
+        ["Operations", "Resolve deactivation issues"],
+        ["TikTok", "Support resolves shop deactivation issues"] ] },
+      { "name": "CQ & brand authorization", "days": 5, "steps": [
+        ["Operations", "Complete CQ & brand authorization"],
+        ["Operations", "Escalate to TikTok Support if still blocked"],
+        ["Brand", "Provide corrected documents if CQ/BA rejected"],
+        ["SCM", "AM helps resolve rejected CQ/BA docs with brand"],
+        ["TikTok", "Support handles escalated CQ/BA rejections"] ] },
+      { "name": "Product listing", "days": 5, "steps": [
+        ["Operations", "Connect shop to fulfillment platform to sync products (e.g. Shopify)"],
+        ["Operations", "If platform can't sync (e.g. Amazon MCF), create listings directly in TTS"],
+        ["Operations", "Notify brand once product setup is done"],
+        ["Brand", "Complete product/SKU mapping once notified"] ] },
+      { "name": "Waiting for inventory – test order", "days": 7, "steps": [
+        ["Operations", "Place test order with brand to confirm flow is correct"],
+        ["Brand", "Confirm test order flow is correct"] ] },
+      { "name": "Final check / live", "days": 2, "steps": [
+        ["Operations", "Request audit from Ops Team Lead"],
+        ["Operations", "Mark live once audit passes"],
+        ["Operations", "Mark task complete once live"] ] },
+      { "name": "Binding", "days": 2, "steps": [
+        ["Operations", "Connect TikTok handle"],
+        ["SCM", "Catherine + AM complete brand binding process"],
+        ["SCM", "File Ops task for Euka/IPPC accounts"],
+        ["Operations", "Create Euka/IPPC accounts (from SCM task)"] ] }
+    ]
+  },
+  "1p-existing-subaccount": {
+    "goLive": "Mark live once audit passes",
+    "stages": [
+      { "name": "Signed – Day 0 setup", "days": 2, "steps": [
+        ["Sales", "Generate onboarding package, send to brand"],
+        ["Sales", "Provide wholesale price (prerequisite for initial PO)"] ] },
+      { "name": "Requirements received", "days": 2, "steps": [
+        ["Sales", "Submit Asana onboarding form"],
+        ["Brand", "Complete onboarding package"],
+        ["Brand", "Share existing shop details (shop code / URL) + required docs"],
+        ["Operations", "OPM assigned once docs received, to initiate onboarding"],
+        ["Operations", "Set up an internal Lark group to streamline communication (auto)"] ] },
+      { "name": "Routing & AM assignment", "days": 2, "steps": [
+        ["Operations", "Confirm routing & supporting TikTok team"],
+        ["Operations", "Request onboarding link if needed"],
+        ["SCM", "Adam assigns an SCM / AM to the brand"],
+        ["TikTok", "Confirmed as supporting team"],
+        ["TikTok", "Provides onboarding link"] ] },
+      { "name": "Subaccount grant & access", "days": 3, "steps": [
+        ["Brand", "Invite Pattern as a subaccount in Seller Center (Manage accounts / staff → assign operator roles & permissions)"],
+        ["Brand", "Complete invite / OTP verification"],
+        ["Operations", "Accept subaccount invite / log in, verify access scope"],
+        ["Operations", "Use shop code to get SKM verification (Catherine)"],
+        ["Operations", "Update Marketplace Seller on Shelf + complete Connect integration"],
+        ["Operations", "Resolve any deactivation issues (no shop build, no entity transfer)"],
+        ["TikTok", "Support resolves access / deactivation issues"] ] },
+      { "name": "CQ & BA (inherit existing)", "days": 2, "steps": [
+        ["Operations", "Inherit brand's existing CQ & BA — no re-application"],
+        ["Operations", "Confirm existing qualifications cover all listed product categories"],
+        ["Operations", "Assist only if a category isn't covered; escalate to TikTok Support if blocked"],
+        ["Brand", "Provide docs only if a category isn't already qualified"],
+        ["SCM", "AM assists only if an uncovered category needs qualifying"],
+        ["TikTok", "Support handles escalated qualification issues (if any)"] ] },
+      { "name": "Final check / live", "days": 2, "steps": [
+        ["Operations", "Request audit from Ops Team Lead"],
+        ["Operations", "Mark live once audit passes"],
+        ["Operations", "Mark task complete once live"] ] },
+      { "name": "Binding", "days": 2, "steps": [
+        ["Operations", "Connect TikTok handle"],
+        ["SCM", "Catherine + AM complete brand binding"],
+        ["SCM", "File Ops task for Euka / IPPC accounts"],
+        ["Operations", "Create Euka / IPPC accounts (from SCM task)"] ] }
+    ]
+  }
+}

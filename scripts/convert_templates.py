@@ -50,6 +50,8 @@ TEMPLATES = {
 }
 
 HEADER = ["Category", "Action #", "Task", "Owner", "Start", "Due", "Days", "Status", "Notes"]
+PIPELINE_CATEGORY = "Onboarding pipeline"
+SOP = json.loads((SRC / "sop-pipeline.json").read_text())  # RACI tables from the Internal Onboarding SOP
 
 # Steps/categories removed per the Internal Onboarding SOP (07/31/2026). The source Excel
 # files are kept as Catherine shared them; these rules are applied at conversion time.
@@ -123,20 +125,39 @@ def convert(stem, meta):
     missing = set(drop["steps"]) - {s["id"] for s in steps}
     assert not missing, f"{stem}: DROP references unknown steps {missing}"
     steps = [s for s in steps if s not in removed]
+
+    # Replace the Excel's first category (the ops pipeline) with the SOP's stage-by-stage RACI
+    # steps. Owners are the SOP's five roles; every step in a stage shares the stage window.
+    excel_first = steps[0]["category"]
+    replaced_first = [s for s in steps if s["category"] == excel_first]
+    steps = [s for s in steps if s["category"] != excel_first]
+    sop = SOP[stem]
+    pipeline, day, n = [], 0, 0
+    for si, st in enumerate(sop["stages"]):
+        for owner, task in st["steps"]:
+            n += 1
+            pipeline.append({
+                "category": PIPELINE_CATEGORY, "action": float(n), "task": task, "owner": owner,
+                "days": st["days"], "status": "Not Started", "notes": None,
+                "id": f"pipeline-{n}", "stage": st["name"], "stageIndex": si + 1,
+                "startOffset": day, "dueOffset": day + st["days"] - 1,
+            })
+        day += st["days"]
+    steps = pipeline + steps
     categories = []
     for s in steps:
-        s["startOffset"] = (s["_start"] - anchor).days if s["_start"] else None
-        s["dueOffset"] = (s["_due"] - anchor).days if s["_due"] else None
-        del s["_start"], s["_due"]
+        if "_start" in s:  # Excel-sourced step; SOP pipeline steps already carry offsets
+            s["startOffset"] = (s["_start"] - anchor).days if s["_start"] else None
+            s["dueOffset"] = (s["_due"] - anchor).days if s["_due"] else None
+            del s["_start"], s["_due"]
         if s["category"] not in categories:
             categories.append(s["category"])
 
     total_days = max(s["dueOffset"] for s in steps if s["dueOffset"] is not None) + 1
     # The real go-live is the "Live/Active" (or "go-live") step inside the FIRST category;
     # every other category keeps running after it (inventory, affiliate, ...).
-    first_cat = categories[0]
-    go_live = next((s for s in steps if s["category"] == first_cat and re.search(r"live\s*/\s*active|go-live|marked live", s["task"], re.I)), None)
-    assert go_live, f"{stem}: no go-live step found in category {first_cat}"
+    go_live = next((s for s in pipeline if s["task"] == sop["goLive"]), None)
+    assert go_live, f"{stem}: go-live step '{sop['goLive']}' not found in SOP pipeline"
     return {
         "goLiveStepId": go_live["id"],
         "goLiveOffset": go_live["dueOffset"],
@@ -151,6 +172,8 @@ def convert(stem, meta):
         "categories": categories,
         "stepCount": len(steps),
         "removedPerSOP": [{"id": r["id"], "category": r["category"], "task": r["task"]} for r in removed],
+        "replacedExcelCategory": {"name": excel_first, "stepCount": len(replaced_first)},
+        "stages": [{"name": st["name"], "days": st["days"]} for st in sop["stages"]],
         "steps": steps,
     }
 

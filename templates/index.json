@@ -6,11 +6,11 @@
       "3p"
     ],
     "plannedDurationDays": 63,
-    "goLiveStepId": "shop-creation-16",
+    "goLiveStepId": "pipeline-36",
     "goLiveOffset": 31,
-    "stepCount": 61,
+    "stepCount": 82,
     "categories": [
-      "Shop Creation",
+      "Onboarding pipeline",
       "Operations",
       "Inventory",
       "Merchandising",
@@ -27,11 +27,11 @@
       "3p - existing"
     ],
     "plannedDurationDays": 73,
-    "goLiveStepId": "ein-transfer-19",
-    "goLiveOffset": 40,
-    "stepCount": 73,
+    "goLiveStepId": "pipeline-31",
+    "goLiveOffset": 54,
+    "stepCount": 88,
     "categories": [
-      "EIN Transfer",
+      "Onboarding pipeline",
       "Operations",
       "Merchandising",
       "Affiliate",
@@ -46,12 +46,12 @@
     "asanaBrandTypes": [
       "new shop"
     ],
-    "plannedDurationDays": 29,
-    "goLiveStepId": "shop-build-18",
-    "goLiveOffset": 26,
-    "stepCount": 56,
+    "plannedDurationDays": 34,
+    "goLiveStepId": "pipeline-33",
+    "goLiveOffset": 31,
+    "stepCount": 74,
     "categories": [
-      "Shop Build",
+      "Onboarding pipeline",
       "Operations",
       "Merchandising",
       "Affiliate",
@@ -67,11 +67,11 @@
       "hybrid"
     ],
     "plannedDurationDays": 25,
-    "goLiveStepId": "subaccount-access-14",
+    "goLiveStepId": "pipeline-27",
     "goLiveOffset": 12,
-    "stepCount": 51,
+    "stepCount": 67,
     "categories": [
-      "Subaccount Access",
+      "Onboarding pipeline",
       "Operations",
       "Merchandising",
       "Affiliate",

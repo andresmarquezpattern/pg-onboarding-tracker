@@ -32,7 +32,9 @@
   .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:600; }
   .pill.ok { background:#d1fae5; color:#047857; } .pill.warn { background:#fef3c7; color:#b45309; } .pill.bad { background:#fee2e2; color:#b91c1c; } .pill.gray { background:#f1f5f9; color:#475569; } .pill.blue { background:#dbeafe; color:#1d4ed8; }
   .owner { display:inline-block; padding:1px 7px; border-radius:5px; font-size:10.5px; font-weight:600; color:#fff; }
-  .owner.Pattern { background:var(--pattern);} .owner.Brand { background:var(--brand);} .owner.Both { background:var(--both);}
+  .owner.Pattern, .owner.Operations { background:var(--pattern);} .owner.Brand { background:var(--brand);} .owner.Both { background:var(--both);}
+  .owner.Sales { background:#0d9488;} .owner.SCM { background:#7c3aed;} .owner.TikTok { background:#111827;}
+  .g-stage { background:#f8fafc; color:#475569; font-size:11px; font-weight:600; padding:4px 10px 4px 22px; }
   .empty { padding:28px; text-align:center; color:var(--muted); background:#f8fafc; border:1px dashed var(--line); border-radius:10px; }
   .loading { display:flex; align-items:center; gap:10px; color:var(--muted); padding:40px 0; justify-content:center; }
   .spinner { width:18px; height:18px; border:3px solid var(--line); border-top-color:#6366f1; border-radius:50%; animation:spin .8s linear infinite; }
@@ -51,7 +53,8 @@
   .g-cat { background:#f1f5f9; font-weight:700; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:#334155; }
   .g-track { position:relative; border-bottom:1px solid #f1f5f9; background:repeating-linear-gradient(90deg, transparent 0, transparent calc(var(--day) - 1px), #f1f5f9 calc(var(--day) - 1px), #f1f5f9 var(--day)); }
   .g-bar { position:absolute; top:5px; height:18px; border-radius:5px; font-size:10.5px; line-height:18px; color:#fff; padding:0 6px; white-space:nowrap; overflow:hidden; opacity:.92; }
-  .g-bar.Pattern { background:var(--pattern);} .g-bar.Brand { background:var(--brand);} .g-bar.Both { background:var(--both);}
+  .g-bar.Pattern, .g-bar.Operations { background:var(--pattern);} .g-bar.Brand { background:var(--brand);} .g-bar.Both { background:var(--both);}
+  .g-bar.Sales { background:#0d9488;} .g-bar.SCM { background:#7c3aed;} .g-bar.TikTok { background:#111827;}
   .g-bar.future { opacity:.45; } .g-bar.late { outline:2px solid var(--bad); outline-offset:-2px; }
   .g-bar.actual { background:#0f172a; opacity:.85; }
   .g-bar.actual.live { background:var(--ok); } .g-bar.actual.blocked { background:var(--bad); }
@@ -263,6 +266,9 @@ function buildBrand(t) {
            tpl, assumed, steps, goLive, goLiveStep, planEnd, health, via:parentCompany(t).via, daysElapsed:diffDays(anchor,tdy) };
 }
 
+const OWNER_CLASS = { Pattern:'Pattern', Operations:'Operations', Brand:'Brand', Sales:'Sales', SCM:'SCM', TikTok:'TikTok' };
+const ownerClass = o => OWNER_CLASS[o] || 'Both';
+
 /* ───────────── Views ───────────── */
 function showView(v){ view=v; document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b.dataset.v===v)); render(); }
 function render(){ ['summary','brand','roadmap'].forEach(v=>document.getElementById('view-'+v).hidden=(v!==view)); ({summary:renderSummary,brand:renderBrand,roadmap:renderRoadmap})[view](); }
@@ -307,9 +313,11 @@ function renderBrand() {
   let rows = `<div class="g-cell g-left g-cat">Actual — Asana stage history <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#64748b">· now: ${esc(b.stage)}</span></div><div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px">${actual}${todayLbl}</div>`;
   // planned steps by category
   for (const cat of b.tpl.categories) {
-    rows += `<div class="g-cell g-left g-cat">${esc(cat)}${cat===first?' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#64748b">· stage tracked in Asana</span>':''}</div><div class="g-track g-cat" style="grid-column:2 / span ${days};--day:${DW}px">${todayLine}</div>`;
+    rows += `<div class="g-cell g-left g-cat">${esc(cat)}${cat===first?' <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#64748b">· per Internal Onboarding SOP · stage tracked in Asana</span>':''}</div><div class="g-track g-cat" style="grid-column:2 / span ${days};--day:${DW}px">${todayLine}</div>`;
+    let lastStage = null;
     for (const s of b.steps.filter(s=>s.category===cat)) {
-      const ownerCls = s.owner==='Pattern'?'Pattern':s.owner==='Brand'?'Brand':'Both';
+      if (s.stage && s.stage !== lastStage) { lastStage = s.stage; rows += `<div class="g-cell g-left g-stage">Stage ${s.stageIndex} · ${esc(s.stage)} <span style="font-weight:400;color:#94a3b8">· ${s.days}d</span></div><div class="g-track" style="grid-column:2 / span ${days};--day:${DW}px;background:#f8fafc">${todayLine}</div>`; }
+      const ownerCls = ownerClass(s.owner);
       const st = s.status==='Done'?'st-done':s.status==='Blocked'?'st-blocked':s.status==='In Progress'?'st-progress':s.status==='N/A'?'st-na':'';
       const late = !st && !b.live && s.due<tdy, future = !st && s.start>tdy;
       rows += `<div class="g-cell g-left step ${editMode?'editable':''}" title="${esc(s.task)}${s.notes?'\n'+esc(s.notes):''}" ${editMode?`onclick="openStepEdit('${s.id}')"`:''}><span style="color:#94a3b8;font-size:11px">${s.action}</span><span class="owner ${ownerCls}">${esc(s.owner)}</span><span class="task">${esc(s.task)}${s.id===b.tpl.goLiveStepId?' <span class="pill ok" style="font-size:10px">GO-LIVE</span>':''}</span><span class="dates">${fmt(s.start)} → ${fmt(s.due)}${s.overridden?' ✎':''}${s.notes?' 💬':''}</span></div>
@@ -347,7 +355,7 @@ function renderBrand() {
       <div class="gantt"><div class="g-grid ${wrapTasks?'wrap':''}" style="${gridCols}">
         <div class="g-head g-left" style="grid-row:1 / span 2;background:#f8fafc;text-align:left;padding-left:10px;line-height:44px">Step · owner · planned dates</div>${months}${dayCells}${rows}
       </div></div>
-      <div class="legend"><span><i style="background:var(--pattern)"></i>Pattern</span><span><i style="background:var(--brand)"></i>Brand</span><span><i style="background:var(--both)"></i>Pattern/Brand</span><span><i style="background:#0f172a"></i>Actual Asana stage</span><span><i style="background:var(--ok)"></i>Done</span><span><i style="background:var(--bad)"></i>Blocked</span><span><i style="border:2px solid #1d4ed8;background:#fff"></i>In progress</span><span><i style="border:2px solid var(--bad);background:#fff"></i>Past due, not confirmed</span><span><i style="background:var(--pattern);opacity:.45"></i>Future</span><span>✎ edited</span></div>
+      <div class="legend"><span><i style="background:#0d9488"></i>Sales</span><span><i style="background:var(--brand)"></i>Brand</span><span><i style="background:var(--pattern)"></i>Operations / Pattern</span><span><i style="background:#7c3aed"></i>SCM</span><span><i style="background:#111827"></i>TikTok</span><span><i style="background:var(--both)"></i>Pattern/Brand</span><span><i style="background:#0f172a;opacity:.6"></i>Actual Asana stage</span><span><i style="background:var(--ok)"></i>Done</span><span><i style="background:var(--bad)"></i>Blocked</span><span><i style="border:2px solid #1d4ed8;background:#fff"></i>In progress</span><span><i style="border:2px solid var(--bad);background:#fff"></i>Past due, not confirmed</span><span><i style="background:var(--pattern);opacity:.45"></i>Future</span><span>✎ edited</span></div>
       <p style="color:#64748b;font-size:12px;margin:10px 0 0">Planned dates come from the ${esc(b.tpl.label)} template anchored on ${esc(b.anchorSrc)} (${fmtY(b.anchor)}). Detected as P&amp;G via ${esc(b.via)}.${b.ov.updatedAt?` Last edited ${fmtY(d0(b.ov.updatedAt))}${b.ov.updatedBy?' by '+esc(b.ov.updatedBy):''}.`:''}</p>
     </div>`;
 }
@@ -357,7 +365,7 @@ async function exportXlsx(list) {
   if (!window.ExcelJS) { alert('Excel library did not load. Check your connection and try again.'); return; }
   const wb = new ExcelJS.Workbook(); wb.creator = 'P&G Onboarding Tracker';
   const FILL = (hex) => ({ type:'pattern', pattern:'solid', fgColor:{ argb:'FF'+hex } });
-  const OWNER_HEX = { Pattern:'F97316', Brand:'0EA5E9', Both:'8B5CF6' };
+  const OWNER_HEX = { Pattern:'F97316', Operations:'F97316', Brand:'0EA5E9', Both:'8B5CF6', Sales:'0D9488', SCM:'7C3AED', TikTok:'111827' };
   const STATUS_HEX = { Done:'10B981', Blocked:'EF4444', 'In Progress':'1D4ED8', 'N/A':'CBD5E1' };
   const tdy = today();
   for (const b of list) {
@@ -366,7 +374,7 @@ async function exportXlsx(list) {
     const HEAD = ['Category','Action #','Task','Owner','Start','Due','Days','Status','Notes'];
     ws.addRow([`${b.tpl.title} — ${b.name}`]).font = { bold:true, size:14 };
     ws.addRow([`Plan start ${fmtY(b.anchor)} (${b.anchorSrc}) · Planned go-live ${fmtY(b.goLive)} · Plan complete ${fmtY(b.planEnd)} · Asana stage: ${b.stage} · exported ${fmtY(tdy)}`]).font = { color:{argb:'FF64748B'}, size:10 };
-    ws.addRow(['Bar colour = owner: Pattern (orange), Brand (blue), Pattern/Brand (purple). Green = Done, red = Blocked. Red column = today.']).font = { color:{argb:'FF64748B'}, size:10 };
+    ws.addRow(['Bar colour = owner: Sales (teal), Brand (blue), Operations/Pattern (orange), SCM (purple), TikTok (black), Pattern/Brand (violet). Green = Done, red = Blocked. Pink column = today.']).font = { color:{argb:'FF64748B'}, size:10 };
     // month + date header rows
     const monthRow = HEAD.map(()=>''), dateRow = HEAD.map(()=>''), dowRow = [...HEAD];
     for (let i=0;i<days;i++){ const d=addDays(from,i); monthRow.push(d.getDate()===1||i===0 ? d.toLocaleDateString('en-US',{month:'short'}) : ''); dateRow.push(d); dowRow.push('SMTWTFS'[d.getDay()]); }
@@ -377,10 +385,9 @@ async function exportXlsx(list) {
     for (const cat of b.tpl.categories) {
       const cr = ws.addRow([cat]); cr.font = { bold:true }; cr.getCell(1).fill = FILL('E2E8F0');
       for (const st of b.steps.filter(x=>x.category===cat)) {
-        const r = ws.addRow([cat, st.action, st.task + (st.id===b.tpl.goLiveStepId?'  ★ GO-LIVE':''), st.owner, st.start, st.due, diffDays(st.start,st.due)+1, st.status||'Not Started', st.notes||'']);
+        const r = ws.addRow([st.stage ? `${cat} · ${st.stageIndex}. ${st.stage}` : cat, st.action, st.task + (st.id===b.tpl.goLiveStepId?'  ★ GO-LIVE':''), st.owner, st.start, st.due, diffDays(st.start,st.due)+1, st.status||'Not Started', st.notes||'']);
         r.getCell(5).numFmt = 'mmm d, yyyy'; r.getCell(6).numFmt = 'mmm d, yyyy';
-        const ownerKey = st.owner==='Pattern'?'Pattern':st.owner==='Brand'?'Brand':'Both';
-        const hex = STATUS_HEX[st.status] || OWNER_HEX[ownerKey];
+        const hex = STATUS_HEX[st.status] || OWNER_HEX[ownerClass(st.owner)];
         for (let i=0;i<days;i++){ const d=addDays(from,i); if (d>=st.start && d<=st.due) r.getCell(HEAD.length+1+i).fill = FILL(hex); }
       }
     }
