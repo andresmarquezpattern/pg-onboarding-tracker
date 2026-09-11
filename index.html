@@ -29,6 +29,7 @@
   th { text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); padding:8px 10px; border-bottom:1px solid var(--line); white-space:nowrap; }
   td { padding:9px 10px; border-bottom:1px solid #f1f5f9; vertical-align:middle; }
   tr.click { cursor:pointer; } tr.click:hover td { background:#fafbfc; }
+  #dlga-q { width:100%; box-sizing:border-box; padding:8px 10px; border:1px solid #e2e8f0; border-radius:8px; font-size:13px; margin-top:8px; }
   .pill { display:inline-block; padding:2px 9px; border-radius:999px; font-size:11px; font-weight:600; }
   .pill.ok { background:#d1fae5; color:#047857; } .pill.warn { background:#fef3c7; color:#b45309; } .pill.bad { background:#fee2e2; color:#b91c1c; } .pill.gray { background:#f1f5f9; color:#475569; } .pill.blue { background:#dbeafe; color:#1d4ed8; }
   .owner { display:inline-block; padding:1px 7px; border-radius:5px; font-size:10.5px; font-weight:600; color:#fff; }
@@ -104,6 +105,7 @@
 <header>
   <div><h1>🧴 P&amp;G Onboarding Tracker</h1><div class="meta" id="meta">TikTok Shop · Procter &amp; Gamble portfolio</div></div>
   <div style="display:flex;gap:8px">
+    <button class="btn" onclick="openAddBrand()" title="Track a brand from Onboarding 2026 that P&amp;G detection missed">＋ Add brand</button>
     <button class="btn" onclick="loadAll()">↻ Refresh</button>
     <button class="btn" id="token-btn" onclick="clearToken()">⚙ Token</button>
     <a class="btn orange" target="_blank" href="https://app.asana.com/1/953966021734988/project/1213113488679843/list">↗ Asana</a>
@@ -128,6 +130,14 @@
   <label>Blocker / status note (shown on summary and brand page)</label><textarea id="dlgb-blocker" rows="3"></textarea>
   <div class="actions"><button type="button" class="btn light" onclick="document.getElementById('dlgb-anchor').value='';document.getElementById('dlgb-blocker').value=''">Clear</button><span><button type="button" class="btn light" onclick="document.getElementById('dlg-brand').close()">Cancel</button> <button type="submit" class="btn primary">Save</button></span></div>
 </form></dialog>
+<dialog id="dlg-add"><div class="dlg">
+  <h3>Add a brand manually</h3><div class="sub">Search every task in Onboarding 2026. Use this when a P&amp;G brand isn't detected automatically (no Parent Company field, not in the brand registry). <span id="dlga-scope"></span></div>
+  <input type="search" id="dlga-q" placeholder="Search brand name…" oninput="renderAddBrand()" autocomplete="off">
+  <div id="dlga-list" style="max-height:300px;overflow:auto;border:1px solid #e2e8f0;border-radius:8px;margin-top:8px"></div>
+  <div style="font-size:12px;font-weight:600;color:#64748b;margin:14px 0 4px">Manually added</div>
+  <div id="dlga-manual" style="border:1px solid #e2e8f0;border-radius:8px"></div>
+  <div class="actions"><span></span><button type="button" class="btn primary" onclick="closeAddBrand()">Done</button></div>
+</div></dialog>
 <main>
   <div class="loading" id="loading"><div class="spinner"></div><span id="loading-msg">Connecting to Asana…</span></div>
   <div id="view-summary" hidden></div>
@@ -170,8 +180,35 @@ function parentCompany(t) {
   if (t.parent?.name && PG_PATTERN.test(t.parent.name)) return {company:'P&G', via:'parent task'};
   const m=/parent (?:company|brand name)[^\n]*\n\s*([^\n]+)/i.exec(t.notes||''); if (m && PG_PATTERN.test(m[1])) return {company:'P&G', via:'intake form'};
   const bn=norm(cf(t,CF.brandName)||t.name); if (bn && PG_NORM.some(b=>bn===b||bn.startsWith(b+' '))) return {company:'P&G', via:'registry'};
+  if (MANUAL.has(t.gid)) return {company:'P&G', via:'manual selection'};
   return {company:null, via:null};
 }
+
+/* Manually-added brands: shared via /api/manual-brands (Cloudflare KV) when proxied, else this browser's localStorage */
+let MANUAL = new Set(); let MANUAL_SHARED = false; let ALL_TASKS = []; let manualDirty = false;
+async function loadManual() {
+  MANUAL = new Set(); MANUAL_SHARED = false;
+  if (PROXY) { try { const o = await (await fetch('/api/manual-brands')).json(); if (o.configured) { MANUAL_SHARED = true; MANUAL = new Set(o.gids||[]); return; } } catch(e) {} }
+  try { MANUAL = new Set(JSON.parse(localStorage.getItem('pg_manual_brands')||'[]')); } catch(e) {}
+}
+async function saveManual() {
+  const gids = [...MANUAL];
+  if (MANUAL_SHARED) { const r = await fetch('/api/manual-brands', {method:'PUT', headers:{'Content-Type':'application/json'}, body:JSON.stringify({gids})}); if (!r.ok) throw new Error('Could not save the manual brand list ('+r.status+')'); }
+  else { try { localStorage.setItem('pg_manual_brands', JSON.stringify(gids)); } catch(e) {} }
+}
+function openAddBrand(){ if (!ALL_TASKS.length) { alert('Load Onboarding 2026 first.'); return; } manualDirty=false; document.getElementById('dlga-q').value=''; document.getElementById('dlga-scope').textContent = MANUAL_SHARED ? 'The list is shared with every viewer of this dashboard.' : 'The list is saved in this browser only.'; renderAddBrand(); document.getElementById('dlg-add').showModal(); document.getElementById('dlga-q').focus(); }
+function closeAddBrand(){ document.getElementById('dlg-add').close(); if (manualDirty) loadAll(); }
+function taskLabel(t){ return cf(t,CF.brandName)||t.name; }
+function renderAddBrand() {
+  const q = norm(document.getElementById('dlga-q').value);
+  const row = (t, action) => `<div style="display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid #f1f5f9;font-size:13px"><div style="flex:1;min-width:0"><b>${esc(taskLabel(t))}</b> <span style="color:#94a3b8">· ${esc(t._sec.name)}${cf(t,CF.brandType)?' · '+esc(cf(t,CF.brandType)):''}</span></div>${action}</div>`;
+  const cands = ALL_TASKS.filter(t => !MANUAL.has(t.gid) && parentCompany(t).company!=='P&G' && (!q || norm(taskLabel(t)).includes(q) || norm(t.name).includes(q))).slice(0,50);
+  document.getElementById('dlga-list').innerHTML = cands.length ? cands.map(t=>row(t,`<button type="button" class="btn light" onclick="addManual('${t.gid}')">＋ Add</button>`)).join('') : `<div style="padding:12px;color:#94a3b8;font-size:13px">${q?'No matching task in Onboarding 2026.':'Every task is already tracked.'}</div>`;
+  const mine = ALL_TASKS.filter(t => MANUAL.has(t.gid));
+  document.getElementById('dlga-manual').innerHTML = mine.length ? mine.map(t=>row(t,`<button type="button" class="btn light" onclick="removeManual('${t.gid}')">✕ Remove</button>`)).join('') : '<div style="padding:12px;color:#94a3b8;font-size:13px">None yet.</div>';
+}
+async function addManual(gid){ MANUAL.add(gid); try { await saveManual(); manualDirty=true; } catch(e){ MANUAL.delete(gid); alert(e.message); } renderAddBrand(); }
+async function removeManual(gid){ MANUAL.delete(gid); try { await saveManual(); manualDirty=true; } catch(e){ MANUAL.add(gid); alert(e.message); } renderAddBrand(); }
 
 /* ───────────── Token + fetch ───────────── */
 const getToken = () => localStorage.getItem('pg_asana_pat') || '';
@@ -219,7 +256,11 @@ async function loadAll() {
 
     M.textContent='Loading Onboarding 2026 from Asana…';
     const OPT='name,notes,parent.name,completed,completed_at,created_at,assignee.name,permalink_url,custom_fields.gid,custom_fields.name,custom_fields.display_value,custom_fields.text_value';
-    const all = (await Promise.all(SECTIONS.map(async s => (await asanaAll(`/sections/${s.id}/tasks`,{opt_fields:OPT,limit:100})).map(t=>({...t,_sec:s}))))).flat();
+    const [all] = await Promise.all([
+      Promise.all(SECTIONS.map(async s => (await asanaAll(`/sections/${s.id}/tasks`,{opt_fields:OPT,limit:100})).map(t=>({...t,_sec:s})))).then(r=>r.flat()),
+      loadManual(),
+    ]);
+    ALL_TASKS = all;
     const pg = all.filter(t => parentCompany(t).company==='P&G');
 
     M.textContent=`Loading stage history for ${pg.length} P&G brands…`;
@@ -292,7 +333,7 @@ function renderSummary() {
       <button class="btn light" onclick="exportXlsx(brands)" title="One workbook, one tab per P&amp;G brand, same layout as the onboarding Gantt templates">⬇ Export all brands .xlsx</button></div>
     <div style="overflow-x:auto"><table><thead><tr><th>Brand</th><th>Type</th><th>Current stage</th><th>Days in stage</th><th>Health</th><th>Signed</th><th>Planned go-live</th><th>Plan complete</th><th>Day</th><th>Ops</th><th>Sales rep</th><th>Blocker</th></tr></thead><tbody>
     ${brands.map(b=>`<tr class="click" onclick="selected='${b.gid}';showView('brand')">
-      <td><b>${esc(b.name)}</b></td><td>${esc(b.brandType||'—')}${b.assumed?' <span class="pill warn" title="No Brand Type in Asana; 3P New Shop template assumed">?</span>':''}</td>
+      <td><b>${esc(b.name)}</b>${b.via==='manual selection'?' <span class="pill blue" title="Added manually via ＋ Add brand">manual</span>':''}</td><td>${esc(b.brandType||'—')}${b.assumed?' <span class="pill warn" title="No Brand Type in Asana; 3P New Shop template assumed">?</span>':''}</td>
       <td>${b.live?'✅ ':b.blocked?'🔴 ':''}${esc(b.stage)}</td><td>${b.inStage}d</td>
       <td><span class="pill ${b.health.k}">${b.health.l}</span></td><td>${fmt(b.signed)}</td><td title="${esc(b.goLiveStep?b.goLiveStep.task:'')}">${fmt(b.goLive)}</td><td style="color:#64748b">${fmt(b.planEnd)}</td>
       <td>${b.daysElapsed} / ${diffDays(b.anchor,b.goLive)+1}</td><td>${esc(b.ops)}</td><td>${esc(b.salesRep)}</td><td style="max-width:320px;white-space:normal">${b.blockerOwner?`<span class="pill bad">${esc(b.blockerOwner)}</span> `:''}${b.blockerNote?`<span style="font-size:12px;color:#475569">${esc(b.blockerNote.slice(0,140))}${b.blockerNote.length>140?'…':''}</span>`:(b.blocked?'<span class="pill warn">no reason in Asana</span>':'—')}</td></tr>`).join('')}

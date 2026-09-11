@@ -5,6 +5,11 @@ Dedicated TikTok Shop onboarding tracker for Procter & Gamble brands.
 - **Asana** (Onboarding 2026 project) supplies the live stage, blockers and days-in-pipeline per brand.
 - **Templates** (`templates/*.json`) supply the planned step list per brand type, re-anchored on each brand's Date Signed.
 - A Google Sheet (optional) holds per-brand overrides: changed dates, step status, notes.
+- **＋ Add brand** (header) searches every task in Onboarding 2026 and pins one to the tracker when
+  P&G detection misses it (e.g. Farmacy Beauty: no Parent Company field, not in the brand registry).
+  Picked brands show a `manual` pill. On Cloudflare Pages the list is shared through
+  `functions/api/manual-brands.js` (same `OVERRIDES` KV namespace, key `manual:brands`); elsewhere it
+  lives in the viewer's localStorage.
 
 ## Layout
 
